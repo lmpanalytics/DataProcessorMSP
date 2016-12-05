@@ -8,6 +8,7 @@ package com.tetrapak.dashboard.dataprocessor;
 import models.MarketBean;
 import java.util.Map;
 import models.MaterialBean;
+import models.TransactionBean;
 
 /**
  *this class process data
@@ -22,6 +23,7 @@ public class Main {
         // TODO code application logic here
         Map<String, MarketBean> mkt = MarketReader.getMARKET_MAP();
         Map<String, MaterialBean> mtrl = MaterialReader.getMATERIAL_MAP();
+        Map<Integer, TransactionBean> tr = TransactionReader.getTRANSACTION_MAP();
 
     }
 
