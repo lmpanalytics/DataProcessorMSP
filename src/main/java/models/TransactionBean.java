@@ -5,6 +5,8 @@
  */
 package models;
 
+import java.time.LocalDate;
+
 /**
  * This bean models monthly transactions from the SwissKnife report
  *
@@ -14,6 +16,10 @@ public class TransactionBean {
 
 //    private LocalDate date;
     private String monthYear;
+    private int numberOfDays;
+    private int month;
+    private int year;
+    private LocalDate date;
     private String category;
     private String marketKey;
     private String finalCustomerKey;
@@ -21,14 +27,34 @@ public class TransactionBean {
     private String customerGroup;
     private String customerType;
     private String materialKey;
-//    private double netSales;
+    private double netSales;
     private String netSalesT;
-//    private double directCost;
+    private double directCost;
     private String directCostT;
-//    private double invoiceQuantity;
+    private double invoiceQuantity;
     private String invoiceQuantityT;
+    private String type;
 
     public TransactionBean() {
+    }
+
+    public TransactionBean(LocalDate date, String category, String marketKey,
+            String finalCustomerKey, String finalCustomerName,
+            String customerGroup, String customerType, String materialKey,
+            double netSales, double directCost, double invoiceQuantity,
+            String type) {
+        this.date = date;
+        this.category = category;
+        this.marketKey = marketKey;
+        this.finalCustomerKey = finalCustomerKey;
+        this.finalCustomerName = finalCustomerName;
+        this.customerGroup = customerGroup;
+        this.customerType = customerType;
+        this.materialKey = materialKey;
+        this.netSales = netSales;
+        this.directCost = directCost;
+        this.invoiceQuantity = invoiceQuantity;
+        this.type = type;
     }
 
     public String getMonthYear() {
@@ -37,6 +63,38 @@ public class TransactionBean {
 
     public void setMonthYear(String monthYear) {
         this.monthYear = monthYear;
+    }
+
+    public int getNumberOfDays() {
+        return numberOfDays;
+    }
+
+    public void setNumberOfDays(int numberOfDays) {
+        this.numberOfDays = numberOfDays;
+    }
+
+    public int getMonth() {
+        return month;
+    }
+
+    public void setMonth(int month) {
+        this.month = month;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
     public String getCategory() {
@@ -95,12 +153,28 @@ public class TransactionBean {
         this.materialKey = materialKey;
     }
 
+    public double getNetSales() {
+        return netSales;
+    }
+
+    public void setNetSales(double netSales) {
+        this.netSales = netSales;
+    }
+
     public String getNetSalesT() {
         return netSalesT;
     }
 
     public void setNetSalesT(String netSalesT) {
         this.netSalesT = netSalesT;
+    }
+
+    public double getDirectCost() {
+        return directCost;
+    }
+
+    public void setDirectCost(double directCost) {
+        this.directCost = directCost;
     }
 
     public String getDirectCostT() {
@@ -111,12 +185,28 @@ public class TransactionBean {
         this.directCostT = directCostT;
     }
 
+    public double getInvoiceQuantity() {
+        return invoiceQuantity;
+    }
+
+    public void setInvoiceQuantity(double invoiceQuantity) {
+        this.invoiceQuantity = invoiceQuantity;
+    }
+
     public String getInvoiceQuantityT() {
         return invoiceQuantityT;
     }
 
     public void setInvoiceQuantityT(String invoiceQuantityT) {
         this.invoiceQuantityT = invoiceQuantityT;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
 }

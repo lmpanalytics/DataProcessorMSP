@@ -11,7 +11,8 @@ import models.MaterialBean;
 import models.TransactionBean;
 
 /**
- *this class process data
+ * this class process data
+ *
  * @author SEPALMM
  */
 public class Main {
@@ -23,7 +24,8 @@ public class Main {
         // TODO code application logic here
         Map<String, MarketBean> mkt = MarketReader.getMARKET_MAP();
         Map<String, MaterialBean> mtrl = MaterialReader.getMATERIAL_MAP();
-        Map<Integer, TransactionBean> tr = TransactionReader.getTRANSACTION_MAP();
+        Map<Integer, TransactionBean> tr = TransactionReader.
+                getTRANSACTION_MAP();
 
     }
 
