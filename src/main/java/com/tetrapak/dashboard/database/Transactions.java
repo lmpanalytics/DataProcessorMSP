@@ -5,6 +5,10 @@
  */
 package com.tetrapak.dashboard.database;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.List;
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
@@ -14,6 +18,7 @@ import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Transaction;
 
 import static org.neo4j.driver.v1.Values.parameters;
+import org.neo4j.driver.v1.exceptions.ClientException;
 
 /**
  * This class runs queries against the Graph database
@@ -51,30 +56,54 @@ public class Transactions {
 
     }
 
-    public void testQuery2() {
+    /**
+     * Makes a Timeline Tree. Each year has its own set of month nodes; each
+     * month has its own set of day nodes. The Cypher statement ensures that all
+     * necessary nodes and relationships for a particular event—year, month,
+     * day, plus the node representing the event itself—are either already
+     * present in the graph, or, if not present, are added to the graph (MERGE
+     * will add any missing elements):
+     *
+     * @param dateList the list of dates to use
+     */
+    public void makeTimeLineTree(List<LocalDate> dateList) {
         try (Session session = driver.session()) {
+            String timelineID = "dashboard";
+            timelineID = Utilities.toCypherVariableFormat(timelineID);
 
-            try (Transaction tx = session.beginTransaction()) {
-                tx.run("CREATE (a:Person {name: {name}, title: {title}})",
-                        parameters("name", "Magnus", "title", "TrailBlaster"));
-                tx.success();
-            }
+            for (LocalDate localDate : dateList) {
+                int year = localDate.getYear();
+                Month month = localDate.getMonth();
+                int monthNumber = localDate.getMonth().getValue();
+                String monthName = month.toString();
+                int dayOfMonth = localDate.getDayOfMonth();
+                DayOfWeek day = localDate.getDayOfWeek();
+//                int dayOfWeek = day.getValue();
 
-            try (Transaction tx = session.beginTransaction()) {
-                StatementResult result = tx.run(
-                        "MATCH (a:Person) WHERE a.name = {name} "
-                        + "RETURN a.name AS name, a.title AS title",
-                        parameters("name", "Magnus"));
-                while (result.hasNext()) {
-                    Record record = result.next();
-                    System.out.println(String.format("%s %s", record.
-                            get("title").asString(), record.get("name").
-                            asString()));
+                try (Transaction tx1 = session.beginTransaction()) {
+//              Run multiple statements
+                    tx1.run("CREATE CONSTRAINT ON (t:Timeline)"
+                            + " ASSERT t.id IS UNIQUE");
+                    tx1.run("CREATE INDEX ON :Year(year)");
+                    tx1.run("CREATE INDEX ON :Month(month)");
+                    tx1.run("CREATE INDEX ON :Day(dayOfMonth)");
+
+                    tx1.success();
                 }
+
+                String tx2 = "MERGE (t:Timeline { id:" + timelineID + "})"
+                        + " MERGE ((t)-[:YEAR]->(y:Year { year:" + year + "}))"
+                        + " MERGE ((y)-[:MONTH]->(m:Month {month:" + monthNumber + ", name:'" + monthName + "'}))"
+                        + " MERGE ((m)-[:DAY]->(d:Day { year:" + year + ", month:" + monthNumber + ", dayOfMonth:" + dayOfMonth + ", name:'" + day + "'}))";
+
+//                System.out.println("Preparing transaction " + tx2);
+                session.run(tx2);
+
             }
 
+        } catch (ClientException e) {
+            System.err.println("Exception in makeTimeLineTree:" + e);
         }
-
     }
 
     /**
