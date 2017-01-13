@@ -5,13 +5,14 @@
  */
 package com.tetrapak.dashboard.dataprocessor;
 
+import com.tetrapak.dashboard.database.Transactions;
 import models.MarketBean;
 import java.util.Map;
 import models.MaterialBean;
 import models.TransactionBean;
 
 /**
- * this class process data
+ * This class processes data
  *
  * @author SEPALMM
  */
@@ -22,10 +23,19 @@ public class Main {
      */
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
-        Map<String, MarketBean> mkt = MarketReader.getMARKET_MAP();
-        Map<String, MaterialBean> mtrl = MaterialReader.getMATERIAL_MAP();
-        Map<Integer, TransactionBean> tr = TransactionReader.
-                getTRANSACTION_MAP();
+        Transactions trx = new Transactions();
+        try {
+            Map<String, MarketBean> mkt = MarketReader.getMARKET_MAP();
+            Map<String, MaterialBean> mtrl = MaterialReader.getMATERIAL_MAP();
+            Map<Integer, TransactionBean> tr = TransactionReader.
+                    getTRANSACTION_MAP();
+
+            trx.testQuery();
+            trx.testQuery2();
+        } catch (Exception e) {
+        } finally {
+            trx.closeNeo4jDriver();
+        }
 
     }
 
