@@ -5,7 +5,7 @@
  */
 package com.tetrapak.dashboard.dataprocessor;
 
-import models.MarketBean;
+import com.tetrapak.dashboard.models.MarketBean;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.List;

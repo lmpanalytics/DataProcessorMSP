@@ -9,7 +9,7 @@ import java.io.FileReader;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
-import models.TransactionBean;
+import com.tetrapak.dashboard.models.TransactionBean;
 import org.supercsv.cellprocessor.Optional;
 import org.supercsv.cellprocessor.ParseInt;
 import org.supercsv.cellprocessor.constraint.NotNull;

@@ -6,10 +6,10 @@
 package com.tetrapak.dashboard.dataprocessor;
 
 import com.tetrapak.dashboard.database.Transactions;
-import models.MarketBean;
+import com.tetrapak.dashboard.models.MarketBean;
 import java.util.Map;
-import models.MaterialBean;
-import models.TransactionBean;
+import com.tetrapak.dashboard.models.MaterialBean;
+import com.tetrapak.dashboard.models.TransactionBean;
 
 /**
  * This class processes data

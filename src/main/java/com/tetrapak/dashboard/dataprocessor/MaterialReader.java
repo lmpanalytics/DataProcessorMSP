@@ -8,7 +8,7 @@ package com.tetrapak.dashboard.dataprocessor;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
-import models.MaterialBean;
+import com.tetrapak.dashboard.models.MaterialBean;
 import org.supercsv.cellprocessor.constraint.NotNull;
 import org.supercsv.cellprocessor.constraint.UniqueHashCode;
 import org.supercsv.cellprocessor.ift.CellProcessor;
