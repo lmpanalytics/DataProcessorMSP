@@ -56,9 +56,13 @@ public class Main {
                     getTRANSACTION_MAP();
 
             trx.makeTimeLineTree(makeThreeYearDateList());
-            
+
+//            Load markets (approximately 10 sec)
             trx.loadMarketData(mkt);
-            
+
+//            Load materials (approximately 3 minutes)
+            trx.loadMaterialData(mtrl);
+
         } catch (Exception e) {
         } finally {
             trx.closeNeo4jDriver();

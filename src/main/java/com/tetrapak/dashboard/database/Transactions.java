@@ -6,6 +6,7 @@
 package com.tetrapak.dashboard.database;
 
 import com.tetrapak.dashboard.models.MarketBean;
+import com.tetrapak.dashboard.models.MaterialBean;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
@@ -111,7 +112,7 @@ public class Transactions {
     /**
      * Loads and creates Nodes for Clusters, Market Groups, and Markets
      *
-     * @param marketMap containing the Market-Key, and Values of Market-Number
+     * @param marketMap containing the Market-Key, and Values of Market-Number,
      * -Name, -Group, and -Cluster
      */
     public void loadMarketData(Map<String, MarketBean> marketMap) {
@@ -154,6 +155,59 @@ public class Transactions {
             System.out.format("Processed %d markets.\n", transactionCounter);
         } catch (ClientException e) {
             System.err.println("Exception in loadMarketData:" + e);
+        }
+
+    }
+
+    /**
+     * Loads and creates Nodes for Assortment Groups, MPGs, Material Names, and
+     * Material Numbers
+     *
+     * @param materialMap containing the Material-Key, and Values of
+     * Material-Number, -Name, MPG, and Assortment Group
+     */
+    public void loadMaterialData(Map<String, MaterialBean> materialMap) {
+        try (Session session = driver.session()) {
+
+            int transactionCounter = 0;
+
+            String globalMtrlID = "dashboard";
+            globalMtrlID = Utilities.toCypherVariableFormat(globalMtrlID);
+
+            for (Map.Entry<String, MaterialBean> entry : materialMap.entrySet()) {
+                String key = entry.getKey();
+                MaterialBean value = entry.getValue();
+
+                String mtrlNumber = key;
+//                Fix read error by removing "'" from material names
+                String mtrlName = value.getMaterialName().replaceAll("'",
+                        "");
+                String mpg = value.getMpg();
+                String assortment = value.getAssortmentGroup();
+
+                try (Transaction tx1 = session.beginTransaction()) {
+//              Run multiple statements
+                    tx1.run("CREATE CONSTRAINT ON (mtrl:Material)"
+                            + " ASSERT mtrl.id IS UNIQUE");
+                    tx1.run("CREATE INDEX ON :Assortment(name)");
+                    tx1.run("CREATE INDEX ON :Mpg(name)");
+
+                    tx1.success();
+                }
+
+                String tx2 = "MERGE (g:GlobalMtrl { id:" + globalMtrlID + ", name:'GLOBAL MATERIAL'})"
+                        + " MERGE ((g)-[:ASSORTMENT]->(a:Assortment { name:'" + assortment + "'}))"
+                        + " MERGE ((a)-[:MPG]->(mpg:Mpg { name:'" + mpg + "'}))"
+                        + " MERGE ((mpg)-[:MATERIAL]->(mtrl:Material { id:'" + mtrlNumber + "', name:'" + mtrlName + "'}))";
+
+//                System.out.println("Preparing transaction " + tx2);
+                session.run(tx2);
+
+                transactionCounter++;
+            }
+            System.out.format("Processed %d materials.\n", transactionCounter);
+        } catch (ClientException e) {
+            System.err.println("Exception in loadMaterialData:" + e);
         }
 
     }
