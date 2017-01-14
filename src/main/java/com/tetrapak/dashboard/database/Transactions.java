@@ -119,7 +119,7 @@ public class Transactions {
         try (Session session = driver.session()) {
 
             int transactionCounter = 0;
-
+            boolean setIndex = true;
             String globalMktID = "dashboard";
             globalMktID = Utilities.toCypherVariableFormat(globalMktID);
 
@@ -133,13 +133,16 @@ public class Transactions {
                 String cluster = value.getCluster();
 //                System.out.println(mktNumber + "; " + mktName + "; " + mktGroup + "; " + cluster);
 
-                try (Transaction tx1 = session.beginTransaction()) {
+                while (setIndex) {
+                    try (Transaction tx1 = session.beginTransaction()) {
 //              Run multiple statements
-                    tx1.run("CREATE CONSTRAINT ON (mkt:Market)"
-                            + " ASSERT mkt.id IS UNIQUE");
-                    tx1.run("CREATE INDEX ON :Market(mktName)");
+                        tx1.run("CREATE CONSTRAINT ON (mkt:Market)"
+                                + " ASSERT mkt.id IS UNIQUE");
+                        tx1.run("CREATE INDEX ON :Market(mktName)");
 
-                    tx1.success();
+                        tx1.success();
+                        setIndex = false;
+                    }
                 }
 
                 String tx2 = "MERGE (g:GlobalMkt { id:" + globalMktID + ", name:'GLOBAL MARKET'})"
@@ -170,6 +173,7 @@ public class Transactions {
         try (Session session = driver.session()) {
 
             int transactionCounter = 0;
+            boolean setIndex = true;
 
             String globalMtrlID = "dashboard";
             globalMtrlID = Utilities.toCypherVariableFormat(globalMtrlID);
@@ -185,14 +189,17 @@ public class Transactions {
                 String mpg = value.getMpg();
                 String assortment = value.getAssortmentGroup();
 
-                try (Transaction tx1 = session.beginTransaction()) {
+                while (setIndex) {
+                    try (Transaction tx1 = session.beginTransaction()) {
 //              Run multiple statements
-                    tx1.run("CREATE CONSTRAINT ON (mtrl:Material)"
-                            + " ASSERT mtrl.id IS UNIQUE");
-                    tx1.run("CREATE INDEX ON :Assortment(name)");
-                    tx1.run("CREATE INDEX ON :Mpg(name)");
+                        tx1.run("CREATE CONSTRAINT ON (mtrl:Material)"
+                                + " ASSERT mtrl.id IS UNIQUE");
+                        tx1.run("CREATE INDEX ON :Assortment(name)");
+                        tx1.run("CREATE INDEX ON :Mpg(name)");
 
-                    tx1.success();
+                        tx1.success();
+                        setIndex = false;
+                    }
                 }
 
                 String tx2 = "MERGE (g:GlobalMtrl { id:" + globalMtrlID + ", name:'GLOBAL MATERIAL'})"
