@@ -5,10 +5,12 @@
  */
 package com.tetrapak.dashboard.database;
 
+import com.tetrapak.dashboard.models.MarketBean;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
+import java.util.Map;
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
@@ -104,6 +106,56 @@ public class Transactions {
         } catch (ClientException e) {
             System.err.println("Exception in makeTimeLineTree:" + e);
         }
+    }
+
+    /**
+     * Loads and creates Nodes for Clusters, Market Groups, and Markets
+     *
+     * @param marketMap containing the Market-Key, and Values of Market-Number
+     * -Name, -Group, and -Cluster
+     */
+    public void loadMarketData(Map<String, MarketBean> marketMap) {
+        try (Session session = driver.session()) {
+
+            int transactionCounter = 0;
+
+            String globalMktID = "dashboard";
+            globalMktID = Utilities.toCypherVariableFormat(globalMktID);
+
+            for (Map.Entry<String, MarketBean> entry : marketMap.entrySet()) {
+                String key = entry.getKey();
+                MarketBean value = entry.getValue();
+
+                String mktNumber = key;
+                String mktName = value.getMarketName();
+                String mktGroup = value.getMarketGroup();
+                String cluster = value.getCluster();
+//                System.out.println(mktNumber + "; " + mktName + "; " + mktGroup + "; " + cluster);
+
+                try (Transaction tx1 = session.beginTransaction()) {
+//              Run multiple statements
+                    tx1.run("CREATE CONSTRAINT ON (mkt:Market)"
+                            + " ASSERT mkt.id IS UNIQUE");
+                    tx1.run("CREATE INDEX ON :Market(mktName)");
+
+                    tx1.success();
+                }
+
+                String tx2 = "MERGE (g:GlobalMkt { id:" + globalMktID + ", name:'GLOBAL MARKET'})"
+                        + " MERGE ((g)-[:CLUSTER]->(c:Cluster { cluster:'" + cluster + "'}))"
+                        + " MERGE ((c)-[:MARKETGROUP]->(mgrp:MarketGroup { marketGroup:'" + mktGroup + "'}))"
+                        + " MERGE ((mgrp)-[:MARKET]->(mkt:Market { id:'" + mktNumber + "', name:'" + mktName + "'}))";
+
+//                System.out.println("Preparing transaction " + tx2);
+                session.run(tx2);
+
+                transactionCounter++;
+            }
+            System.out.format("Processed %d markets.\n", transactionCounter);
+        } catch (ClientException e) {
+            System.err.println("Exception in loadMarketData:" + e);
+        }
+
     }
 
     /**

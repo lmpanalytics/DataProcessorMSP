@@ -56,10 +56,13 @@ public class Main {
                     getTRANSACTION_MAP();
 
             trx.makeTimeLineTree(makeThreeYearDateList());
-
+            
+            trx.loadMarketData(mkt);
+            
         } catch (Exception e) {
         } finally {
             trx.closeNeo4jDriver();
+            java.awt.Toolkit.getDefaultToolkit().beep();
         }
 
     }
