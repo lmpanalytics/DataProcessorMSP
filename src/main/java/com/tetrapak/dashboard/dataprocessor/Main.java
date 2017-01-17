@@ -50,18 +50,28 @@ public class Main {
         // TODO code application logic here
         Transactions trx = new Transactions();
         try {
+//            Load csv files (approximately 10 sec)
             Map<String, MarketBean> mkt = MarketReader.getMARKET_MAP();
             Map<String, MaterialBean> mtrl = MaterialReader.getMATERIAL_MAP();
             Map<Integer, TransactionBean> tr = TransactionReader.
                     getTRANSACTION_MAP();
 
+//            Create service categories
+            trx.createServiceCategories();
+
             trx.makeTimeLineTree(makeThreeYearDateList());
 
-//            Load markets (approximately 10 sec)
+//            Load markets (approximately 1 sec)
             trx.loadMarketData(mkt);
 
 //            Load materials (approximately 3 minutes)
             trx.loadMaterialData(mtrl);
+
+//            Load customer data (approximately 1 sec)
+            trx.loadCustomerData(tr);
+
+//            Load transactions (approximately 1 sec)
+            trx.loadTransactionData(tr);
 
         } catch (Exception e) {
         } finally {
