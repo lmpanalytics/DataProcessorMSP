@@ -113,7 +113,9 @@ public class Transactions {
     }
 
     /**
-     * Loads and creates Nodes for Clusters, Market Groups, and Markets
+     * Loads and creates Nodes for Clusters, Market Groups, and Markets. An
+     * exception is thrown and the program exits in case the value-data change
+     * in the Market Map vs. the database content.
      *
      * @param marketMap containing the Market-Key, and Values of Market-Number,
      * -Name, -Group, and -Cluster
@@ -162,13 +164,15 @@ public class Transactions {
             System.out.format("Processed %d markets.\n", transactionCounter);
         } catch (ClientException e) {
             System.err.println("Exception in loadMarketData:" + e);
+            System.exit(1);
         }
 
     }
 
     /**
      * Loads and creates Nodes for Assortment Groups, MPGs, Material Names, and
-     * Material Numbers
+     * Material Numbers. An exception is thrown and the program exits in case
+     * the value-data change in the Material Map vs. the database content.
      *
      * @param materialMap containing the Material-Key, and Values of
      * Material-Number, -Name, MPG, and Assortment Group
@@ -219,6 +223,7 @@ public class Transactions {
             System.out.format("Processed %d materials.\n", transactionCounter);
         } catch (ClientException e) {
             System.err.println("Exception in loadMaterialData:" + e);
+            System.exit(2);
         }
 
     }
