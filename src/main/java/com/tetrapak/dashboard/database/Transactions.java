@@ -230,7 +230,9 @@ public class Transactions {
 
     /**
      * Loads and creates Nodes for Customer data: Final Customer Number, Final
-     * Customer Name, Customer Group, and Customer Type.
+     * Customer Name, Customer Group, and Customer Type. An exception is thrown
+     * and the program exits in case the value-data change in the Transaction
+     * Map vs. the database content.
      *
      * @param transactionMap
      */
@@ -299,6 +301,7 @@ public class Transactions {
                             transactionCounter);
         } catch (ClientException e) {
             System.err.println("Exception in loadCustomerData:" + e);
+            System.exit(3);
         }
 
     }
