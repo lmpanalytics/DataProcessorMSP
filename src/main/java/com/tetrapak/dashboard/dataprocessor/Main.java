@@ -16,15 +16,19 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * This class processes data
+ * This application reads raw data from csv files, Transforms the raw data and
+ * Loads processed and clean data into a Neo4j database. New data is added to
+ * the database, never deleted.
  *
  * @author SEPALMM
  */
 public class Main {
 
     /**
-     * Makes a list of end-of-month dates, starting in January two years ago,
-     * and three years in to the future.
+     * Makes a list of end-of-month dates, starting starting January two years
+     * ago plus 36 months. It's rolling year-by-year adding a new set of 12
+     * months as needed. It's not overwriting any data. The tree's root is named
+     * `dashboard'.
      *
      * @return List of dates
      */
@@ -50,27 +54,28 @@ public class Main {
         // TODO code application logic here
         Transactions trx = new Transactions();
         try {
-//            Load csv files (approximately 10 sec)
+//            Load csv files (approximately 1 sec)
             Map<String, MarketBean> mkt = MarketReader.getMARKET_MAP();
             Map<String, MaterialBean> mtrl = MaterialReader.getMATERIAL_MAP();
             Map<Integer, TransactionBean> tr = TransactionReader.
                     getTRANSACTION_MAP();
 
-//            Create service categories
+//            Create service categories (approximately 1 sec)
             trx.createServiceCategories();
 
+//            Make timeline tree (approximately 1 sec)
             trx.makeTimeLineTree(makeThreeYearDateList());
 
-//            Load markets (approximately 1 sec)
+//            Load markets (approximately 3 sec)
             trx.loadMarketData(mkt);
 
-//            Load materials (approximately 3 minutes)
+//            Load materials (approximately 2.5 minutes)
             trx.loadMaterialData(mtrl);
 
 //            Load customer data (approximately 1 sec)
             trx.loadCustomerData(tr);
 
-//            Load transactions (approximately 1 sec)
+//            Load transactions (approximately 15 sec)
             trx.loadTransactionData(tr);
 
         } catch (Exception e) {

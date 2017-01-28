@@ -23,7 +23,7 @@ import org.supercsv.prefs.CsvPreference;
  */
 public class MaterialReader {
 
-    private static String CSV_FILENAME_MATERIALS = "materials_raw.csv";
+    private static final String CSV_FILENAME_MATERIALS = "materials_raw.csv";
     private static Map<String, MaterialBean> MATERIAL_MAP;
 
     /**

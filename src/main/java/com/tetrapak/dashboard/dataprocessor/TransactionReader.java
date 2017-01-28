@@ -25,7 +25,7 @@ import org.supercsv.prefs.CsvPreference;
  */
 public class TransactionReader {
 
-    private static String CSV_FILENAME_TRANSACTIONS = "transactions_raw.csv";
+    private static final String CSV_FILENAME_TRANSACTIONS = "transactions_raw.csv";
     private static Map<Integer, TransactionBean> TRANSACTION_MAP;
 
     /**

@@ -8,7 +8,6 @@ package com.tetrapak.dashboard.dataprocessor;
 import com.tetrapak.dashboard.models.MarketBean;
 import java.io.FileReader;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.supercsv.cellprocessor.constraint.NotNull;
 import org.supercsv.cellprocessor.constraint.UniqueHashCode;
@@ -24,7 +23,7 @@ import org.supercsv.prefs.CsvPreference;
  */
 public class MarketReader {
 
-    private static String CSV_FILENAME_MARKETS = "markets_raw.csv";
+    private static final String CSV_FILENAME_MARKETS = "markets_raw.csv";
     private static Map<String, MarketBean> MARKET_MAP;
 
     /**
