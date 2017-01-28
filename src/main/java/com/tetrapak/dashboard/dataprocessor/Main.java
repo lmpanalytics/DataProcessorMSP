@@ -10,6 +10,7 @@ import com.tetrapak.dashboard.models.MarketBean;
 import java.util.Map;
 import com.tetrapak.dashboard.models.MaterialBean;
 import com.tetrapak.dashboard.models.TransactionBean;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.LinkedList;
@@ -54,6 +55,10 @@ public class Main {
         // TODO code application logic here
         Transactions trx = new Transactions();
         try {
+            Timestamp timestampStart = new Timestamp(System.currentTimeMillis());
+            System.out.println(
+                    timestampStart + " :: Starting data load process...");
+
 //            Load csv files (approximately 1 sec)
             Map<String, MarketBean> mkt = MarketReader.getMARKET_MAP();
             Map<String, MaterialBean> mtrl = MaterialReader.getMATERIAL_MAP();
@@ -82,6 +87,8 @@ public class Main {
         } finally {
             trx.closeNeo4jDriver();
             java.awt.Toolkit.getDefaultToolkit().beep();
+            Timestamp timestampEnd = new Timestamp(System.currentTimeMillis());
+            System.out.println(timestampEnd + " :: Finished data load process.");
         }
 
     }
