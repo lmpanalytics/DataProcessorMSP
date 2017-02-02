@@ -340,10 +340,11 @@ public class Transactions {
                         + " MATCH (fc:Customer {id: '" + customerNumber + "'})"
                         + " MATCH (cat:ServiceCategory {name: '" + category + "'})"
                         + " MATCH (mkt:Market {id: '" + marketNumber + "'})"
-                        + " MERGE ((d)<-[:SOLD_ON {custNumber: '" + customerNumber + "', netSales: " + netSales + ", directCost: " + directCost + ", quantity: " + quantity + "}]-(mtr))"
+                        + " MERGE ((d)<-[:SOLD_ON {custNumber: '" + customerNumber + "', marketNumber: '" + marketNumber + "', netSales: " + netSales + ", directCost: " + directCost + ", quantity: " + quantity + "}]-(mtr))"
                         + " MERGE ((mtr)-[:SOLD_TO]->(fc))"
                         + " MERGE ((mtr)-[:CATEGORY]->(cat))"
-                        + " MERGE ((mtr)-[:SOLD_IN]->(mkt))";
+                        + " MERGE ((mtr)-[:SOLD_IN]->(mkt))"
+                        + " MERGE ((fc)-[:LOCATED_IN]->(mkt))";
 
 //                System.out.println("Preparing transaction " + tx3);
                 session.run(tx2);
