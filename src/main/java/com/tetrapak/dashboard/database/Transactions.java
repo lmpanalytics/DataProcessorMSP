@@ -8,7 +8,6 @@ package com.tetrapak.dashboard.database;
 import com.tetrapak.dashboard.models.MarketBean;
 import com.tetrapak.dashboard.models.MaterialBean;
 import com.tetrapak.dashboard.models.TransactionBean;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
@@ -18,13 +17,10 @@ import java.util.Map;
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
-import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
-import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Transaction;
 import org.neo4j.driver.v1.Values;
 
-import static org.neo4j.driver.v1.Values.parameters;
 import org.neo4j.driver.v1.exceptions.ClientException;
 
 /**
@@ -36,32 +32,6 @@ public class Transactions {
 
     Driver driver = GraphDatabase.driver("bolt://localhost:7687",
             AuthTokens.basic("neo4j", "Tokyo2000"));
-
-    public void testQuery() {
-        try (Session session = driver.session()) {
-
-            try (Transaction tx = session.beginTransaction()) {
-                tx.run("CREATE (a:Person {name: {name}, title: {title}})",
-                        parameters("name", "Arthur", "title", "King"));
-                tx.success();
-            }
-
-            try (Transaction tx = session.beginTransaction()) {
-                StatementResult result = tx.run(
-                        "MATCH (a:Person) WHERE a.name = {name} "
-                        + "RETURN a.name AS name, a.title AS title",
-                        parameters("name", "Arthur"));
-                while (result.hasNext()) {
-                    Record record = result.next();
-                    System.out.println(String.format("%s %s", record.
-                            get("title").asString(), record.get("name").
-                            asString()));
-                }
-            }
-
-        }
-
-    }
 
     /**
      * Makes a Timeline Tree. Each year has its own set of month nodes; each
@@ -76,7 +46,6 @@ public class Transactions {
     public void makeTimeLineTree(List<LocalDate> dateList) {
         try (Session session = driver.session()) {
             String timelineID = "dashboard";
-            timelineID = Utilities.toCypherVariableFormat(timelineID);
 
             for (LocalDate localDate : dateList) {
                 int year = localDate.getYear();
@@ -84,8 +53,7 @@ public class Transactions {
                 int monthNumber = localDate.getMonth().getValue();
                 String monthName = month.toString();
                 int dayOfMonth = localDate.getDayOfMonth();
-                DayOfWeek day = localDate.getDayOfWeek();
-//                int dayOfWeek = day.getValue();
+                String day = localDate.getDayOfWeek().toString();
 
                 try (Transaction tx1 = session.beginTransaction()) {
 //              Run multiple statements
@@ -98,13 +66,19 @@ public class Transactions {
                     tx1.success();
                 }
 
-                String tx2 = "MERGE (t:Timeline { id:" + timelineID + "})"
-                        + " MERGE ((t)-[:YEAR]->(y:Year { year:" + year + "}))"
-                        + " MERGE ((y)-[:MONTH]->(m:Month {month:" + monthNumber + ", name:'" + monthName + "'}))"
-                        + " MERGE ((m)-[:DAY]->(d:Day { year:" + year + ", month:" + monthNumber + ", dayOfMonth:" + dayOfMonth + ", name:'" + day + "'}))";
+                String tx2 = "MERGE (t:Timeline {id: {timelineID}})"
+                        + " MERGE ((t)-[:YEAR]->(y:Year { year: {year}}))"
+                        + " MERGE ((y)-[:MONTH]->(m:Month {month: {monthNumber}, name: {monthName}}))"
+                        + " MERGE ((m)-[:DAY]->(d:Day { year: {year}, month: {monthNumber}, dayOfMonth: {dayOfMonth}, name: {day}}))";
 
-//                System.out.println("Preparing transaction " + tx2);
-                session.run(tx2);
+                session.run(tx2, Values.parameters(
+                        "timelineID", timelineID,
+                        "year", year,
+                        "monthNumber", monthNumber,
+                        "monthName", monthName,
+                        "dayOfMonth", dayOfMonth,
+                        "day", day
+                ));
 
             }
 
@@ -159,8 +133,6 @@ public class Transactions {
                         + " MERGE ((c)-[:MARKETGROUP]->(mgrp:MarketGroup {id: {mktGroupCode}, name: {mktGroupName}}))"
                         + " MERGE ((mgrp)-[:MARKET]->(mkt:Market:Country {mktId: {mktCode}, mktName: {mktName}, countryId: {isoCountryCode}, countryName: {countryName}}))";
 
-//                System.out.println("Preparing transaction " + tx2);
-//                session.run(tx2);
                 session.run(tx2, Values.parameters(
                         "globalMktID", globalMktID,
                         "cluster", cluster,
@@ -223,13 +195,18 @@ public class Transactions {
                     }
                 }
 
-                String tx2 = "MERGE (g:GlobalMtrl { id:" + globalMtrlID + ", name:'GLOBAL MATERIAL'})"
-                        + " MERGE ((g)-[:ASSORTMENT]->(a:Assortment { name:'" + assortment + "'}))"
-                        + " MERGE ((a)-[:MPG]->(mpg:Mpg { name:'" + mpg + "'}))"
-                        + " MERGE ((mpg)-[:MATERIAL]->(mtrl:Material { id:'" + mtrlNumber + "', name:'" + mtrlName + "'}))";
+                String tx2 = "MERGE (g:GlobalMtrl { id: {globalMtrlID}, name:'GLOBAL MATERIAL'})"
+                        + " MERGE ((g)-[:ASSORTMENT]->(a:Assortment { name: {assortment}}))"
+                        + " MERGE ((a)-[:MPG]->(mpg:Mpg { name: {mpg}}))"
+                        + " MERGE ((mpg)-[:MATERIAL]->(mtrl:Material { id: {mtrlNumber}, name: {mtrlName}}))";
 
-//                System.out.println("Preparing transaction " + tx2);
-                session.run(tx2);
+                session.run(tx2, Values.parameters(
+                        "globalMtrlID", globalMtrlID,
+                        "assortment", assortment,
+                        "mpg", mpg,
+                        "mtrlNumber", mtrlNumber,
+                        "mtrlName", mtrlName
+                ));
 
                 transactionCounter++;
             }
@@ -302,16 +279,19 @@ public class Transactions {
                 String customerGroup = value.get(2);
                 String customerType = value.get(3);
 
-                String tx2 = "MERGE (c:Customer{id:'" + customerNumber + "',name:'" + customerName + "',custGroup:'" + customerGroup + "',custType:'" + customerType + "'})";
+                String tx2 = "MERGE (c:Customer{id: {customerNumber}, name: {customerName}, custGroup: {customerGroup}, custType: {customerType}})";
 
-//                System.out.println("Preparing transaction " + tx2);
-                session.run(tx2);
+                session.run(tx2, Values.parameters(
+                        "customerNumber", customerNumber,
+                        "customerName", customerName,
+                        "customerGroup", customerGroup,
+                        "customerType", customerType
+                ));
 
                 transactionCounter++;
             }
-            System.out.
-                    format("Processed %d unique customers.\n",
-                            transactionCounter);
+            System.out.format("Processed %d unique customers.\n",
+                    transactionCounter);
         } catch (ClientException e) {
             System.err.println("Exception in loadCustomerData:" + e);
             System.exit(3);
@@ -348,24 +328,33 @@ public class Transactions {
                 Double directCost = value.getDirectCost();
                 Double quantity = value.getInvoiceQuantity();
 
-                String tx2 = "MATCH (d:Day {year: " + year + ", month: " + month + ", dayOfMonth: " + day + "})"
-                        + " MATCH (mtr:Material { id:'" + materialNumber + "'})"
-                        + " MATCH (fc:Customer {id: '" + customerNumber + "'})"
-                        + " MATCH (cat:ServiceCategory {name: '" + category + "'})"
-                        + " MATCH (mkt:Market {mktId: '" + marketNumber + "'})"
-                        + " MERGE ((d)<-[:SOLD_ON {custNumber: '" + customerNumber + "', marketNumber: '" + marketNumber + "', netSales: " + netSales + ", directCost: " + directCost + ", quantity: " + quantity + "}]-(mtr))"
+                String tx2 = "MATCH (d:Day {year: {year}, month: {month}, dayOfMonth: {day}})"
+                        + " MATCH (mtr:Material { id: {materialNumber}})"
+                        + " MATCH (fc:Customer {id: {customerNumber}})"
+                        + " MATCH (cat:ServiceCategory {name: {category}})"
+                        + " MATCH (mkt:Market {mktId: {marketNumber}})"
+                        + " MERGE ((d)<-[:SOLD_ON {custNumber: {customerNumber}, marketNumber: {marketNumber}, netSales: {netSales}, directCost: {directCost}, quantity: {quantity}}]-(mtr))"
                         + " MERGE ((mtr)-[:FOR_FINAL_CUSTOMER]->(fc))"
                         + " MERGE ((mtr)-[:OF_CATEGORY]->(cat))"
                         + " MERGE ((mtr)-[:SOLD_FROM]->(mkt))"
                         + " MERGE ((fc)-[:LOCATED_IN]->(mkt))";
 
-                System.out.println("Preparing transaction " + tx2);
-                session.run(tx2);
+                session.run(tx2, Values.parameters(
+                        "year", year,
+                        "month", month,
+                        "day", day,
+                        "materialNumber", materialNumber,
+                        "customerNumber", customerNumber,
+                        "category", category,
+                        "marketNumber", marketNumber,
+                        "netSales", netSales,
+                        "directCost", directCost,
+                        "quantity", quantity
+                ));
                 transactionCounter++;
             }
-            System.out.
-                    format("Processed %d transactions.\n",
-                            transactionCounter);
+            System.out.format("Processed %d transactions.\n",
+                    transactionCounter);
         } catch (ClientException e) {
             System.err.println("Exception in loadTransactionData:" + e);
         }
