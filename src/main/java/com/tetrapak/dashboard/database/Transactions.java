@@ -22,6 +22,7 @@ import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Transaction;
+import org.neo4j.driver.v1.Values;
 
 import static org.neo4j.driver.v1.Values.parameters;
 import org.neo4j.driver.v1.exceptions.ClientException;
@@ -113,12 +114,11 @@ public class Transactions {
     }
 
     /**
-     * Loads and creates Nodes for Clusters, Market Groups, and Markets. An
-     * exception is thrown and the program exits in case the value-data change
-     * in the Market Map vs. the database content.
+     * Creates Nodes for Clusters, Market Groups, Markets and Countries. The
+     * geographical structure is hard-coded in class MarketMaker.
      *
-     * @param marketMap containing the Market-Key, and Values of Market-Number,
-     * -Name, -Group, and -Cluster
+     * @param marketMap containing the Country-Key, and Values of Country ISO
+     * code, Country Name, Market-Number, -Name, -Group, and Cluster
      */
     public void loadMarketData(Map<String, MarketBean> marketMap) {
         try (Session session = driver.session()) {
@@ -126,38 +126,51 @@ public class Transactions {
             int transactionCounter = 0;
             boolean setIndex = true;
             String globalMktID = "dashboard";
-            globalMktID = Utilities.toCypherVariableFormat(globalMktID);
 
             for (Map.Entry<String, MarketBean> entry : marketMap.entrySet()) {
                 String key = entry.getKey();
                 MarketBean value = entry.getValue();
 
-                String mktNumber = key;
+                String isoCountryCode = key;
+                String countryName = value.getCountryISOname();
+                String mktCode = value.getMarketKey();
                 String mktName = value.getMarketName();
-                String mktGroup = value.getMarketGroup();
+                String mktGroupCode = value.getMarketGroupKey();
+                String mktGroupName = value.getMarketGroupName();
                 String cluster = value.getCluster();
-//                System.out.println(mktNumber + "; " + mktName + "; " + mktGroup + "; " + cluster);
 
+//                System.out.printf("%s, %s, %s, %s, %s, %s, %s\n", key, countryName, mktCode, mktName, mktGroupCode, mktGroupName, cluster);
                 while (setIndex) {
                     try (Transaction tx1 = session.beginTransaction()) {
 //              Run multiple statements
-                        tx1.run("CREATE CONSTRAINT ON (mkt:Market)"
-                                + " ASSERT mkt.id IS UNIQUE");
+                        tx1.run("CREATE CONSTRAINT ON (cy:Country)"
+                                + " ASSERT cy.countryId IS UNIQUE");
                         tx1.run("CREATE INDEX ON :Cluster(name)");
-                        tx1.run("CREATE INDEX ON :Market(name)");
+                        tx1.run("CREATE INDEX ON :MarketGroup(mktGroupCode)");
+                        tx1.run("CREATE INDEX ON :Market(mktCode)");
 
                         tx1.success();
                         setIndex = false;
                     }
                 }
 
-                String tx2 = "MERGE (g:GlobalMkt { id:" + globalMktID + ", name:'GLOBAL MARKET'})"
-                        + " MERGE ((g)-[:CLUSTER]->(c:Cluster { name:'" + cluster + "'}))"
-                        + " MERGE ((c)-[:MARKETGROUP]->(mgrp:MarketGroup { name:'" + mktGroup + "'}))"
-                        + " MERGE ((mgrp)-[:MARKET]->(mkt:Market { id:'" + mktNumber + "', name:'" + mktName + "'}))";
+                String tx2 = "MERGE (g:GlobalMkt { id: {globalMktID}, name:'GLOBAL MARKET'})"
+                        + " MERGE ((g)-[:CLUSTER]->(c:Cluster { name:{cluster}}))"
+                        + " MERGE ((c)-[:MARKETGROUP]->(mgrp:MarketGroup {id: {mktGroupCode}, name: {mktGroupName}}))"
+                        + " MERGE ((mgrp)-[:MARKET]->(mkt:Market:Country {mktId: {mktCode}, mktName: {mktName}, countryId: {isoCountryCode}, countryName: {countryName}}))";
 
 //                System.out.println("Preparing transaction " + tx2);
-                session.run(tx2);
+//                session.run(tx2);
+                session.run(tx2, Values.parameters(
+                        "globalMktID", globalMktID,
+                        "cluster", cluster,
+                        "mktGroupCode", mktGroupCode,
+                        "mktGroupName", mktGroupName,
+                        "mktCode", mktCode,
+                        "mktName", mktName,
+                        "isoCountryCode", isoCountryCode,
+                        "countryName", countryName
+                ));
 
                 transactionCounter++;
             }
@@ -339,14 +352,14 @@ public class Transactions {
                         + " MATCH (mtr:Material { id:'" + materialNumber + "'})"
                         + " MATCH (fc:Customer {id: '" + customerNumber + "'})"
                         + " MATCH (cat:ServiceCategory {name: '" + category + "'})"
-                        + " MATCH (mkt:Market {id: '" + marketNumber + "'})"
+                        + " MATCH (mkt:Market {mktId: '" + marketNumber + "'})"
                         + " MERGE ((d)<-[:SOLD_ON {custNumber: '" + customerNumber + "', marketNumber: '" + marketNumber + "', netSales: " + netSales + ", directCost: " + directCost + ", quantity: " + quantity + "}]-(mtr))"
-                        + " MERGE ((mtr)-[:SOLD_TO]->(fc))"
-                        + " MERGE ((mtr)-[:CATEGORY]->(cat))"
-                        + " MERGE ((mtr)-[:SOLD_IN]->(mkt))"
+                        + " MERGE ((mtr)-[:FOR_FINAL_CUSTOMER]->(fc))"
+                        + " MERGE ((mtr)-[:OF_CATEGORY]->(cat))"
+                        + " MERGE ((mtr)-[:SOLD_FROM]->(mkt))"
                         + " MERGE ((fc)-[:LOCATED_IN]->(mkt))";
 
-//                System.out.println("Preparing transaction " + tx3);
+                System.out.println("Preparing transaction " + tx2);
                 session.run(tx2);
                 transactionCounter++;
             }

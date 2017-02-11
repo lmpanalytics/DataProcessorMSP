@@ -60,7 +60,8 @@ public class Main {
                     timestampStart + " :: Starting data load process...");
 
 //            Load csv files (approximately 1 sec)
-            Map<String, MarketBean> mkt = MarketReader.getMARKET_MAP();
+//            Map<String, MarketBean> mkt = MarketReader.getMARKET_MAP();
+            Map<String, MarketBean> mkt = MarketMaker.getMarketMap();
             Map<String, MaterialBean> mtrl = MaterialReader.getMATERIAL_MAP();
             Map<Integer, TransactionBean> tr = TransactionReader.
                     getTRANSACTION_MAP();
@@ -73,6 +74,7 @@ public class Main {
 
 //            Load markets (approximately 3 sec)
             trx.loadMarketData(mkt);
+
 
 //            Load materials (approximately 2.5 minutes)
             trx.loadMaterialData(mtrl);
