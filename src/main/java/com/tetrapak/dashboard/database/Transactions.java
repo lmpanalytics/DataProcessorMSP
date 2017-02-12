@@ -5,6 +5,7 @@
  */
 package com.tetrapak.dashboard.database;
 
+import com.tetrapak.dashboard.dataprocessor.MarketMaker;
 import com.tetrapak.dashboard.models.MarketBean;
 import com.tetrapak.dashboard.models.MaterialBean;
 import com.tetrapak.dashboard.models.TransactionBean;
@@ -12,8 +13,10 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
@@ -307,7 +310,41 @@ public class Transactions {
      * @param transactionMap
      */
     public void loadTransactionData(Map<Integer, TransactionBean> transactionMap) {
+
         try (Session session = driver.session()) {
+
+            /* =========== TEST FOR NEW MARKETS START ===========*/
+            //       Make set of existing hardcoded markets
+            Set<String> existingMarkets = new HashSet<>();
+            Map<String, MarketBean> marketMap = MarketMaker.getMarketMap();
+            marketMap.entrySet().stream().
+                    map((entry) -> entry.getValue()).
+                    forEachOrdered((value) -> {
+                        existingMarkets.add(value.getMarketKey());
+                    });
+
+//       Make set of markets in added sales transactions
+            Set<String> marketsInTransactions = new HashSet<>();
+            transactionMap.entrySet().stream().
+                    map((entry) -> entry.getValue()).
+                    forEachOrdered((value) -> {
+                        marketsInTransactions.add(value.getMarketKey());
+                    });
+
+//       If sets are not identical, print diff and exit program
+            if (!existingMarkets.containsAll(marketsInTransactions)) {
+                System.err.println(
+                        "ERROR >> Found new markets in sales transactions:");
+                Set<String> difference = new HashSet<>(marketsInTransactions);
+                difference.removeAll(existingMarkets);
+                difference.forEach((diff) -> {
+                    System.out.printf("New market number: %s\n", diff);
+                });
+                System.err.println(
+                        "Manually add these to class MarketMaker before proceeding. Program exits.");
+                System.exit(4);
+            }
+            /* =========== TEST FOR NEW MARKETS END ===========*/
 
             int transactionCounter = 0;
 

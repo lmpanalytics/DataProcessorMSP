@@ -25,11 +25,11 @@ public class MarketBean {
      * 
      * @param countryISOkey from IB report BO
      * @param countryISOname http://www.iso.org/iso/home/standards/country_codes/country_names_and_code_elements_txt-temp.htm
-     * @param marketKey fron Special Ledger report BO
-     * @param marketName fron Special Ledger report BO
-     * @param marketGroupKey fron Special Ledger report BO
-     * @param marketGroupName fron Special Ledger report BO
-     * @param cluster fron Special Ledger report BO
+     * @param marketKey from Special Ledger report BO
+     * @param marketName from Special Ledger report BO
+     * @param marketGroupKey from Special Ledger report BO
+     * @param marketGroupName from Special Ledger report BO
+     * @param cluster from Special Ledger report BO
      */
     public MarketBean(String countryISOkey, String countryISOname,
             String marketKey, String marketName, String marketGroupKey,
