@@ -6,6 +6,7 @@
 package com.tetrapak.dashboard.dataprocessor;
 
 import com.tetrapak.dashboard.database.Transactions;
+import com.tetrapak.dashboard.models.InstalledBaseBean;
 import com.tetrapak.dashboard.models.MarketBean;
 import java.util.Map;
 import com.tetrapak.dashboard.models.MaterialBean;
@@ -64,6 +65,7 @@ public class Main {
             Map<String, MaterialBean> mtrl = MaterialReader.getMATERIAL_MAP();
             Map<Integer, TransactionBean> tr = TransactionReader.
                     getTRANSACTION_MAP();
+            Map<Integer, InstalledBaseBean> ib = InstalledBaseReader.getIB_MAP();
 
 //            Create service categories (approximately 1 sec)
             trx.createServiceCategories();
