@@ -16,7 +16,7 @@ public class InstalledBaseBean {
     private String finalCustomerKey;
     private String finalCustomerName;
     private String customerGroup;
-    private String catalogueProfile;
+    private String assortmentConsumer;
     private double potSpareParts;
     private double potMaintenanceHrs;
     private double potMaintenance;
@@ -24,15 +24,27 @@ public class InstalledBaseBean {
     public InstalledBaseBean() {
     }
 
+    /**
+     *
+     * @param countryISOcode
+     * @param finalCustomerKey
+     * @param finalCustomerName
+     * @param customerGroup
+     * @param assortmentConsumer the type of Spare part assortment group this
+     * type of equipment consumes.
+     * @param potSpareParts
+     * @param potMaintenanceHrs
+     * @param potMaintenance
+     */
     public InstalledBaseBean(String countryISOcode, String finalCustomerKey,
             String finalCustomerName, String customerGroup,
-            String catalogueProfile, double potSpareParts,
+            String assortmentConsumer, double potSpareParts,
             double potMaintenanceHrs, double potMaintenance) {
         this.countryISOcode = countryISOcode;
         this.finalCustomerKey = finalCustomerKey;
         this.finalCustomerName = finalCustomerName;
         this.customerGroup = customerGroup;
-        this.catalogueProfile = catalogueProfile;
+        this.assortmentConsumer = assortmentConsumer;
         this.potSpareParts = potSpareParts;
         this.potMaintenanceHrs = potMaintenanceHrs;
         this.potMaintenance = potMaintenance;
@@ -70,12 +82,12 @@ public class InstalledBaseBean {
         this.customerGroup = customerGroup;
     }
 
-    public String getCatalogueProfile() {
-        return catalogueProfile;
+    public String getAssortmentConsumer() {
+        return assortmentConsumer;
     }
 
-    public void setCatalogueProfile(String catalogueProfile) {
-        this.catalogueProfile = catalogueProfile;
+    public void setAssortmentConsumer(String assortmentConsumer) {
+        this.assortmentConsumer = assortmentConsumer;
     }
 
     public double getPotSpareParts() {

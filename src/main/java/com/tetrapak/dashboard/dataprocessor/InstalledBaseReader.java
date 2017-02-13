@@ -5,6 +5,7 @@
  */
 package com.tetrapak.dashboard.dataprocessor;
 
+import com.tetrapak.dashboard.database.Utilities;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,7 +67,7 @@ public class InstalledBaseReader {
             /* skip past the header 
             (we're defining our own) There are 8 columns in total*/
             final String[] header = {"countryISOcode", "finalCustomerKey",
-                "finalCustomerName", "customerGroup", "catalogueProfile",
+                "finalCustomerName", "customerGroup", "assortmentConsumer",
                 "potSpareParts", "potMaintenanceHrs", "potMaintenance"};
             final CellProcessor[] processors = InstalledBaseReader.
                     getProcessorsIB();
@@ -74,13 +75,16 @@ public class InstalledBaseReader {
             while ((ib = beanReader.read(InstalledBaseBean.class, header,
                     processors)) != null) {
 
-                keyCounter++;
+                String assortment = Utilities.assignAssortmentGroup(
+                        ib.getAssortmentConsumer());
 
                 IB_MAP.put(keyCounter, new InstalledBaseBean(
                         ib.getCountryISOcode(), ib.getFinalCustomerKey(),
                         ib.getFinalCustomerName(), ib.getCustomerGroup(),
-                        ib.getCatalogueProfile(), ib.getPotSpareParts(),
+                        assortment, ib.getPotSpareParts(),
                         ib.getPotMaintenanceHrs(), ib.getPotMaintenance()));
+
+                keyCounter++;
             }
 
         } finally {
