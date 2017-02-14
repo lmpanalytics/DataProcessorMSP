@@ -68,4 +68,65 @@ public class UtilitiesTest {
         assertEquals("Tubular heat exchanger parts", Utilities.assignAssortmentGroup("THE"));
     }
 
+    /**
+     * Test of URI method, of class Utilities.
+     */
+    @Ignore
+    @Test
+    public void testURI() {
+        System.out.println("URI");
+        String expResult = "";
+        String result = Utilities.URI();
+        assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of myUserName method, of class Utilities.
+     */
+    @Ignore
+    @Test
+    public void testMyUserName() {
+        System.out.println("myUserName");
+        String expResult = "";
+        String result = Utilities.myUserName();
+        assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of myPassword method, of class Utilities.
+     */
+    @Ignore
+    @Test
+    public void testMyPassword() {
+        System.out.println("myPassword");
+        String expResult = "";
+        String result = Utilities.myPassword();
+        assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of createTPformatCustNo method, of class Utilities.
+     */
+    @Test
+    public void testCreateTPformatCustNo() {
+        System.out.println("createTPformatCustNo");
+//        assertEquals("Couldn't process input,", expResult, result);
+        assertEquals("Couldn't process input,", "0000000123", Utilities.createTPformatCustNo("123"));
+        assertEquals("Couldn't process input,", "0000000000", Utilities.createTPformatCustNo("0000000000"));
+        assertEquals("Couldn't process input,", "1234567890", Utilities.createTPformatCustNo("1234567890"));
+        assertEquals("Couldn't process input,", "#", Utilities.createTPformatCustNo("ab"));
+        assertEquals("Couldn't process input,", "#", Utilities.createTPformatCustNo("a123"));
+        assertEquals("Couldn't process input,", "#", Utilities.createTPformatCustNo("12345678901"));
+        assertEquals("Couldn't process input,", "#", Utilities.createTPformatCustNo(""));
+        assertEquals("Couldn't process input,", "#", Utilities.createTPformatCustNo("010-1"));
+        
+        assertNotEquals("Couldn't process input,", "00000000ab", Utilities.createTPformatCustNo("ab"));
+    }
+
 }

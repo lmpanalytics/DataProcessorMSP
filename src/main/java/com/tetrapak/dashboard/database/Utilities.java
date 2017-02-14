@@ -20,6 +20,7 @@ public class Utilities {
     public static String URI() {
         return "bolt://localhost:7687";
     }
+
     /**
      * Method to return the user name to the database driver
      *
@@ -28,6 +29,7 @@ public class Utilities {
     public static String myUserName() {
         return "neo4j";
     }
+
     /**
      * Method to return the password to the database driver
      *
@@ -77,5 +79,32 @@ public class Utilities {
             assortment = "Other";
         }
         return assortment;
+    }
+
+    /**
+     * Pass customer numbers of 10 digits (e.g. 0000171046), else check that
+     * customer number to convert consists only of digits of max length 10,
+     * front-fill with zeros, else convert customer number to #.
+     *
+     * @param inputNumber
+     * @return converted Customer Number
+     */
+    public static String createTPformatCustNo(String inputNumber) {
+        // Initialize variables
+        String custNo = "#";
+        int inputNumberlength = 0;
+        String zeros = "";
+        // Qualify input number
+        if (inputNumber.matches("^\\d{1,10}$")) {
+            // Calculate length of paddding
+            inputNumberlength = inputNumber.length();
+            int padding = 10 - inputNumberlength;
+            // Build padding string
+            for (int i = 0; i < padding; i++) {
+                zeros = zeros + "0";
+            }
+            custNo = zeros + inputNumber;
+        }
+        return custNo;
     }
 }

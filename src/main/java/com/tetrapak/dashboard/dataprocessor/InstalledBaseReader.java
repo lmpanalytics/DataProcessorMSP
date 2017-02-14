@@ -87,15 +87,20 @@ public class InstalledBaseReader {
                     myAssortmentConsumer = ib.getAssortmentConsumer();
                 }
 
+                String myFinalCustomerKey = Utilities.createTPformatCustNo(
+                        ib.getFinalCustomerKey());
+
                 String assortment = Utilities.assignAssortmentGroup(
                         myAssortmentConsumer);
 
-                IB_MAP.put(keyCounter, new InstalledBaseBean(
-                        ib.getCountryISOcode(), ib.getFinalCustomerKey(),
-                        ib.getFinalCustomerName(), myCustomerGroup,
-                        assortment, ib.getPotSpareParts(),
-                        ib.getPotMaintenanceHrs(), ib.getPotMaintenance()));
-
+// Add IB to IB Map, on condition that the customer number is not "#".
+                if (!myFinalCustomerKey.equals("#")) {
+                    IB_MAP.put(keyCounter, new InstalledBaseBean(
+                            ib.getCountryISOcode(), myFinalCustomerKey,
+                            ib.getFinalCustomerName(), myCustomerGroup,
+                            assortment, ib.getPotSpareParts(),
+                            ib.getPotMaintenanceHrs(), ib.getPotMaintenance()));
+                }
                 keyCounter++;
             }
 
