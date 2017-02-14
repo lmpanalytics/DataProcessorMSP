@@ -43,9 +43,9 @@ public class InstalledBaseReader {
             new NotNull(), // Final Customer Name
             new Optional(), // Customer Group
             new Optional(), // Catalogue Profile
-            new Optional(new ParseDouble()), // Potential SpareParts
-            new Optional(new ParseDouble()), // Potential Maintenance Hrs
-            new Optional(new ParseDouble()) // Potential Maintenance
+            new NotNull(new ParseDouble()), // Potential SpareParts
+            new NotNull(new ParseDouble()), // Potential Maintenance Hrs
+            new NotNull(new ParseDouble()) // Potential Maintenance
         };
         return processors;
     }
@@ -75,12 +75,24 @@ public class InstalledBaseReader {
             while ((ib = beanReader.read(InstalledBaseBean.class, header,
                     processors)) != null) {
 
+//                Initialize variables
+                String myCustomerGroup = "";
+                String myAssortmentConsumer = "";
+
+//                Handle null pointers
+                if (ib.getCustomerGroup() != null) {
+                    myCustomerGroup = ib.getCustomerGroup();
+                }
+                if (ib.getAssortmentConsumer() != null) {
+                    myAssortmentConsumer = ib.getAssortmentConsumer();
+                }
+
                 String assortment = Utilities.assignAssortmentGroup(
-                        ib.getAssortmentConsumer());
+                        myAssortmentConsumer);
 
                 IB_MAP.put(keyCounter, new InstalledBaseBean(
                         ib.getCountryISOcode(), ib.getFinalCustomerKey(),
-                        ib.getFinalCustomerName(), ib.getCustomerGroup(),
+                        ib.getFinalCustomerName(), myCustomerGroup,
                         assortment, ib.getPotSpareParts(),
                         ib.getPotMaintenanceHrs(), ib.getPotMaintenance()));
 

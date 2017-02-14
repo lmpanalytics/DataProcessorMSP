@@ -13,6 +13,31 @@ package com.tetrapak.dashboard.database;
 public class Utilities {
 
     /**
+     * Method to return the URI of the database driver
+     *
+     * @return URI
+     */
+    public static String URI() {
+        return "bolt://localhost:7687";
+    }
+    /**
+     * Method to return the user name to the database driver
+     *
+     * @return User name
+     */
+    public static String myUserName() {
+        return "neo4j";
+    }
+    /**
+     * Method to return the password to the database driver
+     *
+     * @return password
+     */
+    public static String myPassword() {
+        return "Tokyo2000";
+    }
+
+    /**
      * Helper method that changes the format of a text variable from x to 'x'.
      * This is how text properties are formated in Cypher.
      *

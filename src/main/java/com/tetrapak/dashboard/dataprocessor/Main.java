@@ -5,6 +5,7 @@
  */
 package com.tetrapak.dashboard.dataprocessor;
 
+import com.tetrapak.dashboard.database.Potentials;
 import com.tetrapak.dashboard.database.Transactions;
 import com.tetrapak.dashboard.models.InstalledBaseBean;
 import com.tetrapak.dashboard.models.MarketBean;
@@ -55,6 +56,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         // TODO code application logic here
         Transactions trx = new Transactions();
+        Potentials pot = new Potentials();
         try {
             Timestamp timestampStart = new Timestamp(System.currentTimeMillis());
             System.out.println(
@@ -85,9 +87,13 @@ public class Main {
 //            Load transactions (approximately 15 sec)
             trx.loadTransactionData(tr);
 
+//            Load potentials (approximately xxx sec)
+            pot.loadPotentialsData(ib);
+
         } catch (Exception e) {
         } finally {
             trx.closeNeo4jDriver();
+            pot.closeNeo4jDriver();
             java.awt.Toolkit.getDefaultToolkit().beep();
             Timestamp timestampEnd = new Timestamp(System.currentTimeMillis());
             System.out.println(timestampEnd + " :: Finished data load process.");

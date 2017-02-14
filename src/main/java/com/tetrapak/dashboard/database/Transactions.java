@@ -27,14 +27,15 @@ import org.neo4j.driver.v1.Values;
 import org.neo4j.driver.v1.exceptions.ClientException;
 
 /**
- * This class runs queries against the Graph database
+ * This class runs queries against the Graph database related to sales
+ * transactions.
  *
  * @author SEPALMM
  */
 public class Transactions {
 
-    Driver driver = GraphDatabase.driver("bolt://localhost:7687",
-            AuthTokens.basic("neo4j", "Tokyo2000"));
+    Driver driver = GraphDatabase.driver(Utilities.URI(),
+            AuthTokens.basic(Utilities.myUserName(), Utilities.myPassword()));
 
     /**
      * Makes a Timeline Tree. Each year has its own set of month nodes; each
@@ -390,7 +391,7 @@ public class Transactions {
                 ));
                 transactionCounter++;
             }
-            System.out.format("Processed %d transactions.\n",
+            System.out.format("Processed %d sales transactions.\n",
                     transactionCounter);
         } catch (ClientException e) {
             System.err.println("Exception in loadTransactionData:" + e);
@@ -436,6 +437,6 @@ public class Transactions {
      */
     public void closeNeo4jDriver() {
         driver.close();
-        System.out.println("Closed the driver.");
+        System.out.println("Closed the driver in Transactions class.");
     }
 }

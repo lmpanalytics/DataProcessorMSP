@@ -47,6 +47,7 @@ public class UtilitiesTest {
     public void testAssignAssortmentGroup() {
         System.out.println("assignAssortmentGroup");
         assertEquals("Other", Utilities.assignAssortmentGroup("dummy"));
+        assertEquals("Other", Utilities.assignAssortmentGroup(""));
         assertEquals("Homogeniser parts", Utilities.assignAssortmentGroup("ALEX"));
         assertEquals("Homogeniser parts", Utilities.assignAssortmentGroup("HOMO"));
         assertEquals("Ice cream equipment parts", Utilities.assignAssortmentGroup("ICEXTRUS"));
