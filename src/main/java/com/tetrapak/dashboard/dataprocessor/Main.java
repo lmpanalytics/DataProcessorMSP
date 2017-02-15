@@ -82,7 +82,7 @@ public class Main {
             trx.loadMaterialData(mtrl);
 
 //            Load customer data (approximately 1 sec)
-            trx.loadCustomerData(tr);
+            trx.loadCustomerData(tr, ib);
 
 //            Load transactions (approximately 15 sec)
             trx.loadTransactionData(tr);

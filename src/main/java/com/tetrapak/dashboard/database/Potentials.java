@@ -9,15 +9,12 @@ import com.tetrapak.dashboard.models.InstalledBaseBean;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
 import org.neo4j.driver.v1.Session;
-import org.neo4j.driver.v1.Transaction;
 import org.neo4j.driver.v1.Values;
 
 import org.neo4j.driver.v1.exceptions.ClientException;
@@ -33,10 +30,64 @@ public class Potentials {
     Driver driver = GraphDatabase.driver(Utilities.URI(),
             AuthTokens.basic(Utilities.myUserName(), Utilities.myPassword()));
 
+    /**
+     * Loads and creates Nodes for Installed Base representing potentials. An
+     * exception is thrown and the program exits in case the value-data change
+     * in the Material Map vs. the database content.
+     *
+     * @param installedBaseMap containing the countryISOcode-Key, and Values of
+     * countryISOcode, finalCustomerKey, finalCustomerName, customerGroup,
+     * assortmentConsumer, potSpareParts, potMaintenanceHrs, potMaintenance
+     */
     public void loadPotentialsData(
             Map<Integer, InstalledBaseBean> installedBaseMap) {
         Map<Integer, InstalledBaseBean> potMap = processPotentials(
                 installedBaseMap);
+
+        try (Session session = driver.session()) {
+
+            int eqCounter = 0;
+
+            for (Map.Entry<Integer, InstalledBaseBean> entry : potMap.entrySet()) {
+                InstalledBaseBean value = entry.getValue();
+
+                String countryCode = value.getCountryISOcode();
+                String customerNumber = value.getFinalCustomerKey();
+                String assortmentConsumer = value.getAssortmentConsumer();
+                double spEurPotential = value.getPotSpareParts();
+                double mtHourPotential = value.getPotMaintenanceHrs();
+                double mtEurPotential = value.getPotMaintenance();
+
+                String tx2 = " MATCH (fc:Customer {id: {customerNumber}})"
+                        + " MATCH (c:Country {countryId: {countryCode}})"
+                        + " MERGE (fc)-[:LOCATED_IN]->(c)"
+                        + " MERGE (ib:InstalledBase {id: {customerNumber}})-[:POTENTIAL {spEurPotential: {spEurPotential}, mtHourPotential: {mtHourPotential}, mtEurPotential: {mtEurPotential}}]->(fc)";
+
+                session.run(tx2, Values.parameters(
+                        "customerNumber", customerNumber,
+                        "countryCode", countryCode,
+                        "spEurPotential", spEurPotential,
+                        "mtHourPotential", mtHourPotential,
+                        "mtEurPotential", mtEurPotential
+                ));
+
+                String tx3 = " MATCH (a:Assortment {name: {assortmentConsumer}})"
+                        + " MATCH (ib:InstalledBase {id: {customerNumber}})"
+                        + " MERGE (a)-[:FOR]->(ib)";
+
+                session.run(tx3, Values.parameters(
+                        "assortmentConsumer", assortmentConsumer,
+                        "customerNumber", customerNumber
+                ));
+
+                eqCounter++;
+            }
+            System.out.format("Processed %d instances of Potentials.\n",
+                    eqCounter);
+        } catch (ClientException e) {
+            System.err.println("Exception in loadPotentialsData:" + e);
+            System.exit(5);
+        }
 
     }
 

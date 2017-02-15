@@ -107,4 +107,37 @@ public class Utilities {
         }
         return custNo;
     }
+
+    /**
+     * Make Customer Types based on the Customer Group, especially for TecBase
+     * where Customer types are missing. Customer types derived from Business
+     * Objects are 'Global Account', 'Int. Account', and the rest is, for the
+     * application, assigned as type 'Other'.
+     *
+     * @param custGroup
+     * @return Customer Type
+     */
+    public static String makeCustType(String custGroup) {
+        String custType = "Other";
+        if (custGroup.equals("COCA_COLA")
+                || custGroup.equals("DANONE")
+                || custGroup.equals("LACTALIS")
+                || custGroup.equals("NESTLE")
+                || custGroup.equals("PEPSICO")) {
+            custType = "Global Account";
+        } else if (custGroup.equals("ARLA FOODS")
+                || custGroup.equals("CO_RO FOOD")
+                || custGroup.equals("DEAN FOODS")
+                || custGroup.equals("ECKES")
+                || custGroup.equals("FRIESLANDCAMPINA")
+                || custGroup.equals("GLORIA")/* TB also got 'GLORIA ORIGITA' */
+                || custGroup.equals("HERO")/* TB also got 'HERO GIDA SAN. VE TIC. A.S.' */
+                || custGroup.equals("MASPEX")
+                || custGroup.equals("UNILEVER")
+                || custGroup.equals("YAKULT")) {
+            custType = "Int. Account";
+        }
+
+        return custType;
+    }
 }

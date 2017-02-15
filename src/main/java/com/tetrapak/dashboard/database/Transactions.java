@@ -6,6 +6,7 @@
 package com.tetrapak.dashboard.database;
 
 import com.tetrapak.dashboard.dataprocessor.MarketMaker;
+import com.tetrapak.dashboard.models.InstalledBaseBean;
 import com.tetrapak.dashboard.models.MarketBean;
 import com.tetrapak.dashboard.models.MaterialBean;
 import com.tetrapak.dashboard.models.TransactionBean;
@@ -226,16 +227,18 @@ public class Transactions {
      * Loads and creates Nodes for Customer data: Final Customer Number, Final
      * Customer Name, Customer Group, and Customer Type. An exception is thrown
      * and the program exits in case the value-data change in the Transaction
-     * Map vs. the database content.
+     * Map or Installed Base Map vs. the database content.
      *
      * @param transactionMap
      */
-    public void loadCustomerData(Map<Integer, TransactionBean> transactionMap) {
-//        Collect unique customer data in a map from the larger transaction map
+    public void loadCustomerData(Map<Integer, TransactionBean> transactionMap,
+            Map<Integer, InstalledBaseBean> installedBaseMap) {
 
+//      Initialize maps and lists
         Map<Integer, List<String>> customerMap = new HashMap<>();
         List<String> customerData = null;
 
+//        Collect unique customer data in a map from the larger BO transaction map
         for (Map.Entry<Integer, TransactionBean> entry : transactionMap.
                 entrySet()) {
             TransactionBean value = entry.getValue();
@@ -254,6 +257,27 @@ public class Transactions {
             customerData.add(customerType);
             String custKey = customerNumber + customerName + customerGroup + customerType;
             customerMap.put(custKey.hashCode(), customerData);
+        }
+
+        //        Add Customer data from TecBase to customerMap if absent
+        for (Map.Entry<Integer, InstalledBaseBean> entry : installedBaseMap.
+                entrySet()) {
+            InstalledBaseBean value = entry.getValue();
+
+            String customerNumber = value.getFinalCustomerKey();
+//                Fix read error by removing "'" from customer names
+            String customerName = value.getFinalCustomerName().replaceAll(
+                    "'", "");
+            String customerGroup = value.getCustomerGroup();
+            String customerType = Utilities.makeCustType(customerGroup);
+
+            customerData = new ArrayList<>();
+            customerData.add(customerNumber);
+            customerData.add(customerName);
+            customerData.add(customerGroup);
+            customerData.add(customerType);
+            String custKey = customerNumber + customerName + customerGroup + customerType;
+            customerMap.putIfAbsent(custKey.hashCode(), customerData);
         }
 
 //            Add customer data to Neo4j

@@ -129,4 +129,17 @@ public class UtilitiesTest {
         assertNotEquals("Couldn't process input,", "00000000ab", Utilities.createTPformatCustNo("ab"));
     }
 
+    /**
+     * Test of makeCustType method, of class Utilities.
+     */
+    @Test
+    public void testMakeCustType() {
+        System.out.println("makeCustType");
+//        String result = Utilities.makeCustType(custGroup);
+        assertEquals("Global Account", Utilities.makeCustType("DANONE"));
+        assertEquals("Int. Account", Utilities.makeCustType("YAKULT"));
+        assertEquals("Other", Utilities.makeCustType("DUMMY"));
+        assertEquals("Other", Utilities.makeCustType(""));
+    }
+
 }
