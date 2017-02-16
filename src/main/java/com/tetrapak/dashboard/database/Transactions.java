@@ -270,7 +270,7 @@ public class Transactions {
             customerData.add(customerName);
             customerData.add(customerGroup);
             customerData.add(customerType);
-            String custKey = customerNumber + customerName + customerGroup + customerType;
+            String custKey = customerNumber;
             customerMap.put(custKey.hashCode(), customerData);
         }
 
@@ -291,7 +291,7 @@ public class Transactions {
             customerData.add(customerName);
             customerData.add(customerGroup);
             customerData.add(customerType);
-            String custKey = customerNumber + customerName + customerGroup + customerType;
+            String custKey = customerNumber;
             customerMap.putIfAbsent(custKey.hashCode(), customerData);
         }
 
