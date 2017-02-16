@@ -10,6 +10,7 @@ import com.tetrapak.dashboard.models.InstalledBaseBean;
 import com.tetrapak.dashboard.models.InvoiceBean;
 import com.tetrapak.dashboard.models.MarketBean;
 import com.tetrapak.dashboard.models.MaterialBean;
+import com.tetrapak.dashboard.models.ReferencePartBean;
 import com.tetrapak.dashboard.models.TransactionBean;
 import java.time.LocalDate;
 import java.time.Month;
@@ -165,10 +166,16 @@ public class Transactions {
      * Material Numbers. An exception is thrown and the program exits in case
      * the value-data change in the Material Map vs. the database content.
      *
+     * Information regarding the grouping of materials according to reference
+     * parts is added to the Material nodes.
+     *
      * @param materialMap containing the Material-Key, and Values of
      * Material-Number, -Name, MPG, and Assortment Group
+     * @param refMtrlMap containing the Reference Material-Key, and Values of
+     * Reference Material-Number, and -Name.
      */
-    public void loadMaterialData(Map<String, MaterialBean> materialMap) {
+    public void loadMaterialData(Map<String, MaterialBean> materialMap,
+            Map<String, ReferencePartBean> refMtrlMap) {
         try (Session session = driver.session()) {
 
             int transactionCounter = 0;
@@ -188,6 +195,12 @@ public class Transactions {
                 String mpg = value.getMpg();
                 String assortment = value.getAssortmentGroup();
 
+//                Lookup and assign the refence material name
+                String refName = "";
+                if (refMtrlMap.containsKey(mtrlNumber)) {
+                    refName = refMtrlMap.get(mtrlNumber).getRefMaterialName();
+                }
+
                 while (setIndex) {
                     try (Transaction tx1 = session.beginTransaction()) {
 //              Run multiple statements
@@ -204,14 +217,15 @@ public class Transactions {
                 String tx2 = "MERGE (g:GlobalMtrl { id: {globalMtrlID}, name:'GLOBAL MATERIAL'})"
                         + " MERGE ((g)-[:ASSORTMENT]->(a:Assortment { name: {assortment}}))"
                         + " MERGE ((a)-[:MPG]->(mpg:Mpg { name: {mpg}}))"
-                        + " MERGE ((mpg)-[:MATERIAL]->(mtrl:Material { id: {mtrlNumber}, name: {mtrlName}}))";
+                        + " MERGE ((mpg)-[:MATERIAL]->(mtrl:Material { id: {mtrlNumber}, name: {mtrlName}, refMtrlName: {refName}}))";
 
                 session.run(tx2, Values.parameters(
                         "globalMtrlID", globalMtrlID,
                         "assortment", assortment,
                         "mpg", mpg,
                         "mtrlNumber", mtrlNumber,
-                        "mtrlName", mtrlName
+                        "mtrlName", mtrlName,
+                        "refName", refName
                 ));
 
                 transactionCounter++;

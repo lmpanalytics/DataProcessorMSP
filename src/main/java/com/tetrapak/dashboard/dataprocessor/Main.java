@@ -12,6 +12,7 @@ import com.tetrapak.dashboard.models.InvoiceBean;
 import com.tetrapak.dashboard.models.MarketBean;
 import java.util.Map;
 import com.tetrapak.dashboard.models.MaterialBean;
+import com.tetrapak.dashboard.models.ReferencePartBean;
 import com.tetrapak.dashboard.models.TransactionBean;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -66,10 +67,12 @@ public class Main {
 //            Load csv files (approximately 1 sec)
             Map<String, MarketBean> mkt = MarketMaker.getMarketMap();
             Map<String, MaterialBean> mtrl = MaterialReader.getMATERIAL_MAP();
+            Map<String, ReferencePartBean> refMtrl = ReferencePartReader.
+                    getREF_PART_MAP();
             Map<Integer, TransactionBean> tr = TransactionReader.
                     getTRANSACTION_MAP();
             Map<Integer, InstalledBaseBean> ib = InstalledBaseReader.getIB_MAP();
-            Map<Integer,InvoiceBean> inv = InvoiceReader.getINVOICE_MAP();
+            Map<Integer, InvoiceBean> inv = InvoiceReader.getINVOICE_MAP();
 
 //            Create service categories (approximately 1 sec)
             trx.createServiceCategories();
@@ -80,8 +83,8 @@ public class Main {
 //            Load global market structure (approximately 3 sec)
             trx.loadMarketData(mkt);
 
-//            Load global material master (approximately 2.5 minutes)
-            trx.loadMaterialData(mtrl);
+            /* Load global material master and assign Reference part mapping (approximately 2.5 minutes) */
+            trx.loadMaterialData(mtrl, refMtrl);
 
 //            Load customer data (approximately 1 sec)
             trx.loadCustomerData(tr, ib);
