@@ -7,6 +7,7 @@ package com.tetrapak.dashboard.database;
 
 import com.tetrapak.dashboard.dataprocessor.MarketMaker;
 import com.tetrapak.dashboard.models.InstalledBaseBean;
+import com.tetrapak.dashboard.models.InvoiceBean;
 import com.tetrapak.dashboard.models.MarketBean;
 import com.tetrapak.dashboard.models.MaterialBean;
 import com.tetrapak.dashboard.models.TransactionBean;
@@ -332,9 +333,15 @@ public class Transactions {
      * Category (Finance), Market Number, Final Customer Number, and Material
      * Number.
      *
-     * @param transactionMap
+     * @param transactionMap contains values from the Special Ledger Report.
+     * @param invoiceMap containing the Market and Material Composite Key, and
+     * Values of MarketKey Material Number, Assortment Group, and MPG.
+     * @param materialMap containing the Material Number Key, and values of
+     * Material-Number, -Name, MPG, and the Assortment Group.
      */
-    public void loadTransactionData(Map<Integer, TransactionBean> transactionMap) {
+    public void loadTransactionData(Map<Integer, TransactionBean> transactionMap,
+            Map<Integer, InvoiceBean> invoiceMap,
+            Map<String, MaterialBean> materialMap) {
 
         try (Session session = driver.session()) {
 
@@ -377,6 +384,8 @@ public class Transactions {
                     entrySet()) {
 //                Integer key = entry.getKey();
                 TransactionBean value = entry.getValue();
+                String localAssortment = "";
+                String localMPG = "";
 
                 LocalDate date = value.getDate();
                 int year = date.getYear();
@@ -390,12 +399,40 @@ public class Transactions {
                 Double directCost = value.getDirectCost();
                 Double quantity = value.getInvoiceQuantity();
 
+//                Fix Blank Assortment Groups
+//              Look up assortment group
+                String globalAssortmentGrp = materialMap.get(materialNumber).
+                        getAssortmentGroup();
+                if (globalAssortmentGrp.equals("Blank assortment group")) {
+
+                    /* Look up the assortment group used by the corresponding 
+                    transaction market for this material number. 
+                    This information is in the invoice map. */
+                    Integer compKey = (marketNumber + materialNumber).hashCode();
+
+//                    Handle null pointer exception
+                    if (invoiceMap.containsKey(compKey)) {
+                        String lookupLocalAssortmentGrp = invoiceMap.
+                                get(compKey).
+                                getAssortmentGroup();
+
+                        /*  If the local assortment group is not "Blank", update 
+                    Local Assortment Group and MPG in the 'SOLD_ON' relationship. */
+                        if (!lookupLocalAssortmentGrp.equals(
+                                "Blank assortment group")) {
+                            localAssortment = lookupLocalAssortmentGrp;
+                            localMPG = invoiceMap.get(compKey).getMpg();
+//                        System.out.printf("Re-assign %s of mtrl %s to %s and MPG %s\n", globalAssortmentGrp, materialNumber, localAssortment, localMPG);
+                        }
+                    }
+                }
+
                 String tx2 = "MATCH (d:Day {year: {year}, month: {month}, dayOfMonth: {day}})"
                         + " MATCH (mtr:Material { id: {materialNumber}})"
                         + " MATCH (fc:Customer {id: {customerNumber}})"
                         + " MATCH (cat:ServiceCategory {name: {category}})"
                         + " MATCH (mkt:Market {mktId: {marketNumber}})"
-                        + " MERGE ((d)<-[:SOLD_ON {custNumber: {customerNumber}, marketNumber: {marketNumber}, netSales: {netSales}, directCost: {directCost}, quantity: {quantity}}]-(mtr))"
+                        + " MERGE ((d)<-[:SOLD_ON {custNumber: {customerNumber}, marketNumber: {marketNumber}, localAssortmentGrp: {localAssortment}, localMPG: {localMPG}, netSales: {netSales}, directCost: {directCost}, quantity: {quantity}}]-(mtr))"
                         + " MERGE ((mtr)-[:FOR_FINAL_CUSTOMER]->(fc))"
                         + " MERGE ((mtr)-[:OF_CATEGORY]->(cat))"
                         + " MERGE ((mtr)-[:SOLD_FROM]->(mkt))"
@@ -409,6 +446,8 @@ public class Transactions {
                         "customerNumber", customerNumber,
                         "category", category,
                         "marketNumber", marketNumber,
+                        "localAssortment", localAssortment,
+                        "localMPG", localMPG,
                         "netSales", netSales,
                         "directCost", directCost,
                         "quantity", quantity

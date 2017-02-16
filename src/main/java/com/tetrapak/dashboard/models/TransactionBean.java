@@ -14,7 +14,6 @@ import java.time.LocalDate;
  */
 public class TransactionBean {
 
-//    private LocalDate date;
     private String monthYear;
     private int numberOfDays;
     private int month;

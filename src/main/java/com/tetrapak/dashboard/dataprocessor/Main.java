@@ -8,6 +8,7 @@ package com.tetrapak.dashboard.dataprocessor;
 import com.tetrapak.dashboard.database.Potentials;
 import com.tetrapak.dashboard.database.Transactions;
 import com.tetrapak.dashboard.models.InstalledBaseBean;
+import com.tetrapak.dashboard.models.InvoiceBean;
 import com.tetrapak.dashboard.models.MarketBean;
 import java.util.Map;
 import com.tetrapak.dashboard.models.MaterialBean;
@@ -68,6 +69,7 @@ public class Main {
             Map<Integer, TransactionBean> tr = TransactionReader.
                     getTRANSACTION_MAP();
             Map<Integer, InstalledBaseBean> ib = InstalledBaseReader.getIB_MAP();
+            Map<Integer,InvoiceBean> inv = InvoiceReader.getINVOICE_MAP();
 
 //            Create service categories (approximately 1 sec)
             trx.createServiceCategories();
@@ -75,17 +77,17 @@ public class Main {
 //            Make timeline tree (approximately 1 sec)
             trx.makeTimeLineTree(makeThreeYearDateList());
 
-//            Load markets (approximately 3 sec)
+//            Load global market structure (approximately 3 sec)
             trx.loadMarketData(mkt);
 
-//            Load materials (approximately 2.5 minutes)
+//            Load global material master (approximately 2.5 minutes)
             trx.loadMaterialData(mtrl);
 
 //            Load customer data (approximately 1 sec)
             trx.loadCustomerData(tr, ib);
 
 //            Load transactions (approximately 15 sec)
-            trx.loadTransactionData(tr);
+            trx.loadTransactionData(tr, inv, mtrl);
 
 //            Load potentials (approximately xxx sec)
             pot.loadPotentialsData(ib);
