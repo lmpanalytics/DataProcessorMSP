@@ -62,7 +62,10 @@ public class MaterialReader {
             MaterialBean mtrl;
             while ((mtrl = beanReader.read(MaterialBean.class, header,
                     processors)) != null) {
-                MATERIAL_MAP.put(mtrl.getMaterialKey(), mtrl);
+//                Filter out not assigned mtrl numbers
+                if (!mtrl.getMaterialKey().equals("#")) {
+                    MATERIAL_MAP.put(mtrl.getMaterialKey(), mtrl);
+                }
             }
         } finally {
             if (beanReader != null) {
