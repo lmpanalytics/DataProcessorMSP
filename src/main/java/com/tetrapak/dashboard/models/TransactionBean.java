@@ -32,7 +32,8 @@ public class TransactionBean {
     private String directCostT;
     private double invoiceQuantity;
     private String invoiceQuantityT;
-    private String type;
+    private String typeOfQty;
+    private Boolean sourceBO;
 
     public TransactionBean() {
     }
@@ -41,7 +42,7 @@ public class TransactionBean {
             String finalCustomerKey, String finalCustomerName,
             String customerGroup, String customerType, String materialKey,
             double netSales, double directCost, double invoiceQuantity,
-            String type) {
+            String typeOfQty, Boolean sourceBO) {
         this.date = date;
         this.category = category;
         this.marketKey = marketKey;
@@ -53,7 +54,8 @@ public class TransactionBean {
         this.netSales = netSales;
         this.directCost = directCost;
         this.invoiceQuantity = invoiceQuantity;
-        this.type = type;
+        this.typeOfQty = typeOfQty;
+        this.sourceBO = sourceBO;
     }
 
     public String getMonthYear() {
@@ -200,12 +202,20 @@ public class TransactionBean {
         this.invoiceQuantityT = invoiceQuantityT;
     }
 
-    public String getType() {
-        return type;
+    public String getTypeOfQty() {
+        return typeOfQty;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setTypeOfQty(String typeOfQty) {
+        this.typeOfQty = typeOfQty;
+    }
+
+    public Boolean isSourceBO() {
+        return sourceBO;
+    }
+
+    public void setSourceBO(Boolean sourceBO) {
+        this.sourceBO = sourceBO;
     }
 
 }

@@ -23,7 +23,9 @@ import java.util.Set;
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
+import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
+import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Transaction;
 import org.neo4j.driver.v1.Values;
 
@@ -246,10 +248,21 @@ public class Transactions {
      * and the program exits in case the value-data change in the Transaction
      * Map or Installed Base Map vs. the database content. Based on Customer
      * Groups, three different Customer types are assigned: 'Global Account',
-     * 'Int. Account', and the rest is, for the application, assigned as type
-     * 'Other'.
+     * 'Int. Account', and the rest as type 'Other'.
      *
-     * @param transactionMap
+     * Basic flow: 1) Query database and collect current customer data
+     * originating from BO. 2) Collect unique customer data from the BO
+     * transaction map and add to customerMap if absent. 3) Delete Customers in
+     * DB originating from TecBase. 4) Add Customer data from TecBase to
+     * customerMap if absent. 5) Add customer data to database.
+     *
+     * This ensures that Customer data from BO Special Ledger report has
+     * precedence over Installed Base data. It also means that earlier data has
+     * precedence over newer data. - Try to change this in a future fix so that
+     * newer data decides the customer group membership in the data base.
+     *
+     * @param transactionMap Special Ledger data
+     * @param installedBaseMap TecBase data
      */
     public void loadCustomerData(Map<Integer, TransactionBean> transactionMap,
             Map<Integer, InstalledBaseBean> installedBaseMap) {
@@ -258,7 +271,44 @@ public class Transactions {
         Map<Integer, List<String>> customerMap = new HashMap<>();
         List<String> customerData = null;
 
-//        Collect unique customer data in a map from the larger BO transaction map
+//        Query database and collect current customer data originating from BO
+        try (Session session = driver.session()) {
+
+            String tx = "MATCH (c:Customer {isSourceBO: 'true'})"
+                    + " RETURN c.id AS ID, c.name AS Name, c.custGroup AS CustGroup, c.custType AS CustType, c.isSourceBO AS IsSourceBO";
+
+            StatementResult result = session.run(tx);
+
+            while (result.hasNext()) {
+                Record r = result.next();
+
+                String customerNumber = r.get("ID").asString();
+                String customerName = r.get("Name").asString();
+                String customerGroup = r.get("CustGroup").asString();
+                String customerType = r.get("CustType").asString();
+                String isSourceBO = r.get("IsSourceBO").asString();
+
+//            Add results to Map
+                customerData = new ArrayList<>();
+                customerData.add(customerNumber);
+                customerData.add(customerName);
+                customerData.add(customerGroup);
+                customerData.add(customerType);
+                customerData.add(isSourceBO);
+                String custKey = customerNumber;
+//                Add results to map if originating from BO
+                if (isSourceBO.equals("true")) {
+                    customerMap.put(custKey.hashCode(), customerData);
+//                    System.out.printf("Originating from BO, and add to customer Map: %s, %s\n", customerNumber, customerName);
+                }
+
+            }
+
+        } catch (ClientException e) {
+            System.err.println("Exception in 'populateSalesMap()':" + e);
+        }
+
+//        Collect unique customer data from the BO transaction map and add to customerMap if absent
         for (Map.Entry<Integer, TransactionBean> entry : transactionMap.
                 entrySet()) {
             TransactionBean value = entry.getValue();
@@ -275,8 +325,16 @@ public class Transactions {
             customerData.add(customerName);
             customerData.add(customerGroup);
             customerData.add(customerType);
+            customerData.add(value.isSourceBO().toString());
             String custKey = customerNumber;
-            customerMap.put(custKey.hashCode(), customerData);
+            customerMap.putIfAbsent(custKey.hashCode(), customerData);
+        }
+
+//        Delete Customers in DB originating from TecBase
+        try (Session session = driver.session()) {
+            Transaction tx1 = session.beginTransaction();
+            tx1.run("MATCH (c:Customer {isSourceBO: 'false'}) DETACH DELETE c");
+            tx1.success();
         }
 
         //        Add Customer data from TecBase to customerMap if absent
@@ -290,12 +348,14 @@ public class Transactions {
                     "'", "");
             String customerGroup = value.getCustomerGroup();
             String customerType = Utilities.makeCustType(customerGroup);
+            String isSourceBO = "false";
 
             customerData = new ArrayList<>();
             customerData.add(customerNumber);
             customerData.add(customerName);
             customerData.add(customerGroup);
             customerData.add(customerType);
+            customerData.add(isSourceBO);
             String custKey = customerNumber;
             customerMap.putIfAbsent(custKey.hashCode(), customerData);
         }
@@ -326,14 +386,16 @@ public class Transactions {
                 String customerName = value.get(1);
                 String customerGroup = value.get(2);
                 String customerType = value.get(3);
+                String isSourceBO = value.get(4);
 
-                String tx2 = "MERGE (c:Customer{id: {customerNumber}, name: {customerName}, custGroup: {customerGroup}, custType: {customerType}})";
+                String tx3 = "MERGE (c:Customer{id: {customerNumber}, name: {customerName}, custGroup: {customerGroup}, custType: {customerType}, isSourceBO: {isSourceBO}})";
 
-                session.run(tx2, Values.parameters(
+                session.run(tx3, Values.parameters(
                         "customerNumber", customerNumber,
                         "customerName", customerName,
                         "customerGroup", customerGroup,
-                        "customerType", customerType
+                        "customerType", customerType,
+                        "isSourceBO", isSourceBO
                 ));
 
                 transactionCounter++;
@@ -390,7 +452,7 @@ public class Transactions {
                 Set<String> difference = new HashSet<>(marketsInTransactions);
                 difference.removeAll(existingMarkets);
                 difference.forEach((diff) -> {
-                    System.out.printf("New market number: %s\n", diff);
+                    System.err.printf("New market number: %s\n", diff);
                 });
                 System.err.println(
                         "Manually add these to class MarketMaker before proceeding. Program exits.");

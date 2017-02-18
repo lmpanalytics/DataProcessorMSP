@@ -135,7 +135,7 @@ public class TransactionReader {
                             getFinalCustomerKey(), tr.getFinalCustomerName(),
                             myCustomerGroup, tr.getCustomerType(),
                             tr.getMaterialKey(), myNetSales, myDirectCost,
-                            qty, myType));
+                            qty, myType, true));
                 }
             }
         } catch (IOException e) {
