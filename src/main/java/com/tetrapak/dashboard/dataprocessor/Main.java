@@ -91,17 +91,19 @@ public class Main {
 
 //            Load transactions (approximately 15 sec)
             trx.loadTransactionData(tr, inv, mtrl);
-
+            
 //            Load potentials (approximately xxx sec)
             pot.loadPotentialsData(ib);
-
+            
+            Timestamp timestampEnd = new Timestamp(System.currentTimeMillis());
+            System.out.println(timestampEnd + " :: Finished data load process.");            
+            
         } catch (Exception e) {
+            throw e; 
         } finally {
             trx.closeNeo4jDriver();
             pot.closeNeo4jDriver();
             java.awt.Toolkit.getDefaultToolkit().beep();
-            Timestamp timestampEnd = new Timestamp(System.currentTimeMillis());
-            System.out.println(timestampEnd + " :: Finished data load process.");
         }
 
     }

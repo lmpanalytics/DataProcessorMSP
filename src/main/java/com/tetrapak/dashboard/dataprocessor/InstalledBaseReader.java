@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
 import com.tetrapak.dashboard.models.InstalledBaseBean;
+import java.io.IOException;
 import org.supercsv.cellprocessor.Optional;
 import org.supercsv.cellprocessor.ParseDouble;
 import org.supercsv.cellprocessor.constraint.NotNull;
@@ -76,12 +77,17 @@ public class InstalledBaseReader {
                     processors)) != null) {
 
 //                Initialize variables
-                String myCustomerGroup = "";
+                String myCustomerGroup = "0";
                 String myAssortmentConsumer = "";
 
 //                Handle null pointers
                 if (ib.getCustomerGroup() != null) {
                     myCustomerGroup = ib.getCustomerGroup();
+//                    Assign '0' to empty customer group names
+                    if (myCustomerGroup.equals("") || myCustomerGroup.matches(
+                            "^\\s+$") || myCustomerGroup.isEmpty()) {
+                        myCustomerGroup = "0";
+                    }
                 }
                 if (ib.getAssortmentConsumer() != null) {
                     myAssortmentConsumer = ib.getAssortmentConsumer();
@@ -104,6 +110,8 @@ public class InstalledBaseReader {
                 keyCounter++;
             }
 
+        } catch (IOException e) {
+            throw e;
         } finally {
             if (beanReader != null) {
                 beanReader.close();

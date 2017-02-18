@@ -90,7 +90,8 @@ public class Transactions {
             }
 
         } catch (ClientException e) {
-            System.err.println("Exception in makeTimeLineTree:" + e);
+            System.err.
+                    println("Exception in makeTimeLineTree:" + e.getMessage());
         }
     }
 
@@ -155,7 +156,7 @@ public class Transactions {
             }
             System.out.format("Processed %d markets.\n", transactionCounter);
         } catch (ClientException e) {
-            System.err.println("Exception in loadMarketData:" + e);
+            System.err.println("Exception in loadMarketData:" + e.getMessage());
             System.exit(1);
         }
 
@@ -232,7 +233,8 @@ public class Transactions {
             }
             System.out.format("Processed %d materials.\n", transactionCounter);
         } catch (ClientException e) {
-            System.err.println("Exception in loadMaterialData:" + e);
+            System.err.
+                    println("Exception in loadMaterialData:" + e.getMessage());
             System.exit(2);
         }
 
@@ -242,7 +244,10 @@ public class Transactions {
      * Loads and creates Nodes for Customer data: Final Customer Number, Final
      * Customer Name, Customer Group, and Customer Type. An exception is thrown
      * and the program exits in case the value-data change in the Transaction
-     * Map or Installed Base Map vs. the database content.
+     * Map or Installed Base Map vs. the database content. Based on Customer
+     * Groups, three different Customer types are assigned: 'Global Account',
+     * 'Int. Account', and the rest is, for the application, assigned as type
+     * 'Other'.
      *
      * @param transactionMap
      */
@@ -263,7 +268,7 @@ public class Transactions {
             String customerName = value.getFinalCustomerName().replaceAll(
                     "'", "");
             String customerGroup = value.getCustomerGroup();
-            String customerType = value.getCustomerType();
+            String customerType = Utilities.makeCustType(customerGroup);
 
             customerData = new ArrayList<>();
             customerData.add(customerNumber);
@@ -336,7 +341,8 @@ public class Transactions {
             System.out.format("Processed %d unique customers.\n",
                     transactionCounter);
         } catch (ClientException e) {
-            System.err.println("Exception in loadCustomerData:" + e);
+            System.err.
+                    println("Exception in loadCustomerData:" + e.getMessage());
             System.exit(3);
         }
 
@@ -414,31 +420,37 @@ public class Transactions {
                 Double quantity = value.getInvoiceQuantity();
 
 //                Fix Blank Assortment Groups
+                if (materialMap.containsKey(materialNumber)) {
 //              Look up assortment group
-                String globalAssortmentGrp = materialMap.get(materialNumber).
-                        getAssortmentGroup();
-                if (globalAssortmentGrp.equals("Blank assortment group")) {
+                    String globalAssortmentGrp = materialMap.get(materialNumber).
+                            getAssortmentGroup();
+                    if (globalAssortmentGrp.equals("Blank assortment group")) {
 
-                    /* Look up the assortment group used by the corresponding 
+                        /* Look up the assortment group used by the corresponding 
                     transaction market for this material number. 
                     This information is in the invoice map. */
-                    Integer compKey = (marketNumber + materialNumber).hashCode();
+                        Integer compKey = (marketNumber + materialNumber).
+                                hashCode();
 
 //                    Handle null pointer exception
-                    if (invoiceMap.containsKey(compKey)) {
-                        String lookupLocalAssortmentGrp = invoiceMap.
-                                get(compKey).
-                                getAssortmentGroup();
+                        if (invoiceMap.containsKey(compKey)) {
+                            String lookupLocalAssortmentGrp = invoiceMap.
+                                    get(compKey).
+                                    getAssortmentGroup();
 
-                        /*  If the local assortment group is not "Blank", update 
+                            /*  If the local assortment group is not "Blank", update 
                     Local Assortment Group and MPG in the 'SOLD_ON' relationship. */
-                        if (!lookupLocalAssortmentGrp.equals(
-                                "Blank assortment group")) {
-                            localAssortment = lookupLocalAssortmentGrp;
-                            localMPG = invoiceMap.get(compKey).getMpg();
+                            if (!lookupLocalAssortmentGrp.equals(
+                                    "Blank assortment group")) {
+                                localAssortment = lookupLocalAssortmentGrp;
+                                localMPG = invoiceMap.get(compKey).getMpg();
 //                        System.out.printf("Re-assign %s of mtrl %s to %s and MPG %s\n", globalAssortmentGrp, materialNumber, localAssortment, localMPG);
+                            }
                         }
                     }
+                } else {
+                    System.err.println(
+                            ">> WARNING: Global materialMap is missing material: " + materialNumber + "");
                 }
 
                 String tx2 = "MATCH (d:Day {year: {year}, month: {month}, dayOfMonth: {day}})"
@@ -471,7 +483,8 @@ public class Transactions {
             System.out.format("Processed %d sales transactions.\n",
                     transactionCounter);
         } catch (ClientException e) {
-            System.err.println("Exception in loadTransactionData:" + e);
+            System.err.println("Exception in loadTransactionData:" + e.
+                    getMessage());
         }
 
     }
@@ -504,7 +517,8 @@ public class Transactions {
             System.out.println(
                     "Assured presence of Service Categories 'Maintenance Work' and 'Parts'.");
         } catch (ClientException e) {
-            System.err.println("Exception in createServiceCategories:" + e);
+            System.err.println("Exception in createServiceCategories:" + e.
+                    getMessage());
         }
 
     }

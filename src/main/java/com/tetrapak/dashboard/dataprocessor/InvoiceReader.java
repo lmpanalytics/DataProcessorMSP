@@ -7,6 +7,7 @@ package com.tetrapak.dashboard.dataprocessor;
 
 import com.tetrapak.dashboard.models.InvoiceBean;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.supercsv.cellprocessor.constraint.NotNull;
@@ -71,6 +72,8 @@ public class InvoiceReader {
                     INVOICE_MAP.put(compositeKey, invoice);
                 }
             }
+        } catch (IOException e) {
+            throw e;
         } finally {
             if (beanReader != null) {
                 beanReader.close();

@@ -85,7 +85,7 @@ public class Potentials {
             System.out.format("Processed %d instances of Potentials.\n",
                     eqCounter);
         } catch (ClientException e) {
-            System.err.println("Exception in loadPotentialsData:" + e);
+            System.err.println("Exception in loadPotentialsData:" + e.getMessage());
             System.exit(5);
         }
 

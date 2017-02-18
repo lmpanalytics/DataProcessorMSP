@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import com.tetrapak.dashboard.models.TransactionBean;
+import java.io.IOException;
 import org.supercsv.cellprocessor.Optional;
 import org.supercsv.cellprocessor.ParseInt;
 import org.supercsv.cellprocessor.constraint.NotNull;
@@ -86,6 +87,7 @@ public class TransactionReader {
                 double myDirectCost = 0d;
                 double qty = 0d;
                 String myType = "";
+                String myCustomerGroup = "";
 
 //                Make compiled key
                 keyCounter++;
@@ -93,6 +95,14 @@ public class TransactionReader {
 //                Make a local date
                 LocalDate myDate = LocalDate.of(tr.getYear(), tr.getMonth(), tr.
                         getNumberOfDays());
+//                    Assign '0' to empty customer group names
+                if (tr.getCustomerGroup().equals("") || tr.getCustomerGroup().
+                        matches("^\\s+$") || tr.getCustomerGroup().isEmpty()) {
+                    System.out.println("jag är här");
+                    myCustomerGroup = "0";
+                } else {
+                    myCustomerGroup = tr.getCustomerGroup();
+                }
 //                Convert sales and cost to Double, and handle null exceptions
                 if (tr.getNetSalesT() != null) {
                     myNetSales = Double.parseDouble(tr.getNetSalesT().
@@ -123,11 +133,13 @@ public class TransactionReader {
                     TRANSACTION_MAP.put(key.hashCode(), new TransactionBean(
                             myDate, tr.getCategory(), tr.getMarketKey(), tr.
                             getFinalCustomerKey(), tr.getFinalCustomerName(),
-                            tr.getCustomerGroup(), tr.getCustomerType(),
+                            myCustomerGroup, tr.getCustomerType(),
                             tr.getMaterialKey(), myNetSales, myDirectCost,
                             qty, myType));
                 }
             }
+        } catch (IOException e) {
+            throw e;
         } finally {
             if (beanReader != null) {
                 beanReader.close();

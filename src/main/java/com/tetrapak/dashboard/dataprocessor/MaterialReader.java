@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
 import com.tetrapak.dashboard.models.MaterialBean;
+import java.io.IOException;
 import org.supercsv.cellprocessor.constraint.NotNull;
 import org.supercsv.cellprocessor.constraint.UniqueHashCode;
 import org.supercsv.cellprocessor.ift.CellProcessor;
@@ -67,6 +68,8 @@ public class MaterialReader {
                     MATERIAL_MAP.put(mtrl.getMaterialKey(), mtrl);
                 }
             }
+        } catch (IOException e) {
+            throw e;
         } finally {
             if (beanReader != null) {
                 beanReader.close();
