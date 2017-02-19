@@ -36,8 +36,8 @@ public class Potentials {
      * in the Material Map vs. the database content.
      *
      * @param installedBaseMap containing the countryISOcode-Key, and Values of
-     * countryISOcode, finalCustomerKey, finalCustomerName, customerGroup,
-     * assortmentConsumer, potSpareParts, potMaintenanceHrs, potMaintenance
+     * countryISOcode, finalCustomerKey, assortmentConsumer, potSpareParts,
+     * potMaintenanceHrs, potMaintenance
      */
     public void loadPotentialsData(
             Map<Integer, InstalledBaseBean> installedBaseMap) {
@@ -73,7 +73,7 @@ public class Potentials {
                 ));
 
                 String tx3 = " MATCH (a:Assortment {name: {assortmentConsumer}})"
-                        + " MATCH (ib:InstalledBase {id: {customerNumber}})"
+                        + " MATCH (ib:InstalledBase {id: {customerNumber}, name: {assortmentConsumer}})"
                         + " MERGE (a)-[:FOR]->(ib)";
 
                 session.run(tx3, Values.parameters(
@@ -86,7 +86,8 @@ public class Potentials {
             System.out.format("Processed %d instances of Potentials.\n",
                     eqCounter);
         } catch (ClientException e) {
-            System.err.println("Exception in loadPotentialsData:" + e.getMessage());
+            System.err.println("Exception in loadPotentialsData:" + e.
+                    getMessage());
             System.exit(5);
         }
 
@@ -111,170 +112,103 @@ public class Potentials {
                 myCollection);
 
 //  Spare part EUR potentials
-        Map<String, Map<String, Map<String, Map<String, Map<String, Double>>>>> spPotMap = ib.
-                stream()
+        Map<String, Map<String, Map<String, Double>>> spPotMap = ib.stream()
                 .collect(Collectors.groupingBy(
                         InstalledBaseBean::getCountryISOcode,
                         Collectors.groupingBy(
                                 InstalledBaseBean::getFinalCustomerKey,
                                 Collectors.groupingBy(
-                                        InstalledBaseBean::getFinalCustomerName,
-                                        Collectors.groupingBy(
-                                                InstalledBaseBean::getCustomerGroup,
-                                                Collectors.groupingBy(
-                                                        InstalledBaseBean::getAssortmentConsumer,
-                                                        Collectors.
-                                                                summingDouble(
-                                                                        InstalledBaseBean::getPotSpareParts)))))));
+                                        InstalledBaseBean::getAssortmentConsumer,
+                                        Collectors.
+                                                summingDouble(
+                                                        InstalledBaseBean::getPotSpareParts)))));
 //  Maintenance HRS potentials
-        Map<String, Map<String, Map<String, Map<String, Map<String, Double>>>>> mtPotHrsMap = ib.
-                stream()
+        Map<String, Map<String, Map<String, Double>>> mtPotHrsMap = ib.stream()
                 .collect(Collectors.groupingBy(
                         InstalledBaseBean::getCountryISOcode,
                         Collectors.groupingBy(
                                 InstalledBaseBean::getFinalCustomerKey,
                                 Collectors.groupingBy(
-                                        InstalledBaseBean::getFinalCustomerName,
-                                        Collectors.groupingBy(
-                                                InstalledBaseBean::getCustomerGroup,
-                                                Collectors.groupingBy(
-                                                        InstalledBaseBean::getAssortmentConsumer,
-                                                        Collectors.
-                                                                summingDouble(
-                                                                        InstalledBaseBean::getPotMaintenanceHrs)))))));
+                                        InstalledBaseBean::getAssortmentConsumer,
+                                        Collectors.
+                                                summingDouble(
+                                                        InstalledBaseBean::getPotMaintenanceHrs)))));
 //  Maintenance EUR potentials
-        Map<String, Map<String, Map<String, Map<String, Map<String, Double>>>>> mtPotMap = ib.
-                stream()
+        Map<String, Map<String, Map<String, Double>>> mtPotMap = ib.stream()
                 .collect(Collectors.groupingBy(
                         InstalledBaseBean::getCountryISOcode,
                         Collectors.groupingBy(
                                 InstalledBaseBean::getFinalCustomerKey,
                                 Collectors.groupingBy(
-                                        InstalledBaseBean::getFinalCustomerName,
-                                        Collectors.groupingBy(
-                                                InstalledBaseBean::getCustomerGroup,
-                                                Collectors.groupingBy(
-                                                        InstalledBaseBean::getAssortmentConsumer,
-                                                        Collectors.
-                                                                summingDouble(
-                                                                        InstalledBaseBean::getPotMaintenance)))))));
+                                        InstalledBaseBean::getAssortmentConsumer,
+                                        Collectors.
+                                                summingDouble(
+                                                        InstalledBaseBean::getPotMaintenance)))));
 
 //  Flatten the spPotMap
-        for (Map.Entry<String, Map<String, Map<String, Map<String, Map<String, Double>>>>> entry : spPotMap.
+        for (Map.Entry<String, Map<String, Map<String, Double>>> entry : spPotMap.
                 entrySet()) {
             String countryCode = entry.getKey();
-            Map<String, Map<String, Map<String, Map<String, Double>>>> custNoMap = entry.
-                    getValue();
-            for (Map.Entry<String, Map<String, Map<String, Map<String, Double>>>> entry1 : custNoMap.
+            Map<String, Map<String, Double>> custNoMap = entry.getValue();
+            for (Map.Entry<String, Map<String, Double>> entry1 : custNoMap.
                     entrySet()) {
                 String custNo = entry1.getKey();
-                Map<String, Map<String, Map<String, Double>>> custNameMap = entry1.
-                        getValue();
-                for (Map.Entry<String, Map<String, Map<String, Double>>> entry2 : custNameMap.
-                        entrySet()) {
-                    String custName = entry2.getKey();
-                    Map<String, Map<String, Double>> custGrpMap = entry2.
-                            getValue();
-                    for (Map.Entry<String, Map<String, Double>> entry3 : custGrpMap.
-                            entrySet()) {
-                        String custGrp = entry3.getKey();
-                        Map<String, Double> consumerMap = entry3.getValue();
-                        for (Map.Entry<String, Double> entry4 : consumerMap.
-                                entrySet()) {
-                            String consumer = entry4.getKey();
-                            Double potential = entry4.getValue();
+                Map<String, Double> consumerMap = entry1.getValue();
+                for (Map.Entry<String, Double> entry2 : consumerMap.entrySet()) {
+                    String consumer = entry2.getKey();
+                    Double potential = entry2.getValue();
 
-//                            System.out.printf("%s, %s, %s, %s, %s, %s\n", countryCode, custNo, custName, custGrp, consumer, potential);
-//                            Add to potentials map
-                            Integer key = (countryCode + custNo + custName
-                                    + custGrp + consumer).hashCode();
-                            potentialsMap.put(key, new InstalledBaseBean(
-                                    countryCode, custNo, custName, custGrp,
-                                    consumer, potential, 0, 0));
-
-                        }
-                    }
+//  System.out.printf("%s, %s, %s, %s, %s, %s\n", countryCode, custNo, consumer, potential);
+//  Add to potentials map
+                    Integer key = (countryCode + custNo + consumer).hashCode();
+                    potentialsMap.put(key, new InstalledBaseBean(countryCode,
+                            custNo, consumer, potential, 0, 0));
                 }
             }
-
         }
 
         //  Flatten the mtPotHrsMap
-        for (Map.Entry<String, Map<String, Map<String, Map<String, Map<String, Double>>>>> entry : mtPotHrsMap.
+        for (Map.Entry<String, Map<String, Map<String, Double>>> entry : mtPotHrsMap.
                 entrySet()) {
             String countryCode = entry.getKey();
-            Map<String, Map<String, Map<String, Map<String, Double>>>> custNoMap = entry.
-                    getValue();
-            for (Map.Entry<String, Map<String, Map<String, Map<String, Double>>>> entry1 : custNoMap.
+            Map<String, Map<String, Double>> custNoMap = entry.getValue();
+            for (Map.Entry<String, Map<String, Double>> entry1 : custNoMap.
                     entrySet()) {
                 String custNo = entry1.getKey();
-                Map<String, Map<String, Map<String, Double>>> custNameMap = entry1.
-                        getValue();
-                for (Map.Entry<String, Map<String, Map<String, Double>>> entry2 : custNameMap.
-                        entrySet()) {
-                    String custName = entry2.getKey();
-                    Map<String, Map<String, Double>> custGrpMap = entry2.
-                            getValue();
-                    for (Map.Entry<String, Map<String, Double>> entry3 : custGrpMap.
-                            entrySet()) {
-                        String custGrp = entry3.getKey();
-                        Map<String, Double> consumerMap = entry3.getValue();
-                        for (Map.Entry<String, Double> entry4 : consumerMap.
-                                entrySet()) {
-                            String consumer = entry4.getKey();
-                            Double potential = entry4.getValue();
+                Map<String, Double> consumerMap = entry1.getValue();
+                for (Map.Entry<String, Double> entry2 : consumerMap.entrySet()) {
+                    String consumer = entry2.getKey();
+                    Double potential = entry2.getValue();
 
-//                            Add to potentials map
-                            Integer key = (countryCode + custNo + custName
-                                    + custGrp + consumer).hashCode();
+//  Add to potentials map
+                    Integer key = (countryCode + custNo + consumer).hashCode();
 //  Update potential
-                            InstalledBaseBean v = potentialsMap.get(key);
-                            v.setPotMaintenanceHrs(potential);
-
-                        }
-                    }
+                    InstalledBaseBean v = potentialsMap.get(key);
+                    v.setPotMaintenanceHrs(potential);
                 }
             }
-
         }
 
 //  Flatten the mtPotMap
-        for (Map.Entry<String, Map<String, Map<String, Map<String, Map<String, Double>>>>> entry : mtPotMap.
+        for (Map.Entry<String, Map<String, Map<String, Double>>> entry : mtPotMap.
                 entrySet()) {
             String countryCode = entry.getKey();
-            Map<String, Map<String, Map<String, Map<String, Double>>>> custNoMap = entry.
-                    getValue();
-            for (Map.Entry<String, Map<String, Map<String, Map<String, Double>>>> entry1 : custNoMap.
+            Map<String, Map<String, Double>> custNoMap = entry.getValue();
+            for (Map.Entry<String, Map<String, Double>> entry1 : custNoMap.
                     entrySet()) {
                 String custNo = entry1.getKey();
-                Map<String, Map<String, Map<String, Double>>> custNameMap = entry1.
-                        getValue();
-                for (Map.Entry<String, Map<String, Map<String, Double>>> entry2 : custNameMap.
-                        entrySet()) {
-                    String custName = entry2.getKey();
-                    Map<String, Map<String, Double>> custGrpMap = entry2.
-                            getValue();
-                    for (Map.Entry<String, Map<String, Double>> entry3 : custGrpMap.
-                            entrySet()) {
-                        String custGrp = entry3.getKey();
-                        Map<String, Double> consumerMap = entry3.getValue();
-                        for (Map.Entry<String, Double> entry4 : consumerMap.
-                                entrySet()) {
-                            String consumer = entry4.getKey();
-                            Double potential = entry4.getValue();
+                Map<String, Double> consumerMap = entry1.getValue();
+                for (Map.Entry<String, Double> entry2 : consumerMap.entrySet()) {
+                    String consumer = entry2.getKey();
+                    Double potential = entry2.getValue();
 
-//                            Add to potentials map
-                            Integer key = (countryCode + custNo + custName
-                                    + custGrp + consumer).hashCode();
+//  Add to potentials map
+                    Integer key = (countryCode + custNo + consumer).hashCode();
 //  Update potential
-                            InstalledBaseBean v = potentialsMap.get(key);
-                            v.setPotMaintenance(potential);
-
-                        }
-                    }
+                    InstalledBaseBean v = potentialsMap.get(key);
+                    v.setPotMaintenance(potential);
                 }
             }
-
         }
 
         return potentialsMap;

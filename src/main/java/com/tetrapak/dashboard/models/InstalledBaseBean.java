@@ -25,6 +25,7 @@ public class InstalledBaseBean {
     }
 
     /**
+     * First constructor
      *
      * @param countryISOcode
      * @param finalCustomerKey
@@ -44,6 +45,18 @@ public class InstalledBaseBean {
         this.finalCustomerKey = finalCustomerKey;
         this.finalCustomerName = finalCustomerName;
         this.customerGroup = customerGroup;
+        this.assortmentConsumer = assortmentConsumer;
+        this.potSpareParts = potSpareParts;
+        this.potMaintenanceHrs = potMaintenanceHrs;
+        this.potMaintenance = potMaintenance;
+    }
+
+//    Second constructor
+    public InstalledBaseBean(String countryISOcode, String finalCustomerKey,
+            String assortmentConsumer, double potSpareParts,
+            double potMaintenanceHrs, double potMaintenance) {
+        this.countryISOcode = countryISOcode;
+        this.finalCustomerKey = finalCustomerKey;
         this.assortmentConsumer = assortmentConsumer;
         this.potSpareParts = potSpareParts;
         this.potMaintenanceHrs = potMaintenanceHrs;
