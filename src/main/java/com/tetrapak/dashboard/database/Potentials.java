@@ -61,10 +61,11 @@ public class Potentials {
                 String tx2 = " MATCH (fc:Customer {id: {customerNumber}})"
                         + " MATCH (c:Country {countryId: {countryCode}})"
                         + " MERGE (fc)-[:LOCATED_IN]->(c)"
-                        + " MERGE (ib:InstalledBase {id: {customerNumber}})-[:POTENTIAL {spEurPotential: {spEurPotential}, mtHourPotential: {mtHourPotential}, mtEurPotential: {mtEurPotential}}]->(fc)";
+                        + " MERGE (ib:InstalledBase {id: {customerNumber}, name: {assortmentConsumer}})-[:POTENTIAL {spEurPotential: {spEurPotential}, mtHourPotential: {mtHourPotential}, mtEurPotential: {mtEurPotential}}]->(fc)";
 
                 session.run(tx2, Values.parameters(
                         "customerNumber", customerNumber,
+                        "assortmentConsumer", assortmentConsumer,
                         "countryCode", countryCode,
                         "spEurPotential", spEurPotential,
                         "mtHourPotential", mtHourPotential,
