@@ -5,6 +5,8 @@
  */
 package com.tetrapak.dashboard.database;
 
+import com.tetrapak.dashboard.models.TransactionBean;
+
 /**
  * This is a utility class
  *
@@ -139,5 +141,41 @@ public class Utilities {
         }
 
         return custType;
+    }
+
+    /**
+     * Extract Quantity from the quantity field in BO Transaction report. The BO
+     * field is composed of a number and a Quantity String type. Remove all
+     * Letters and white space.
+     *
+     * Quantity types used are: ACT; BAG; BOT; BOX; CAR; CAS; EA; FT; FT2; GAL;
+     * HR; KG; KM; KPC; KPK; L; LB; M; ML; MM; PAA; PAK; PC; QT; ROL; SET; TON
+     *
+     * @param tr
+     * @return numerical quantity
+     * @throws NumberFormatException
+     */
+    public static double extractQuantity(TransactionBean tr) throws NumberFormatException {
+//        Remove all Letters, white space
+        return Double.parseDouble(tr.getInvoiceQuantityT().
+                replaceAll("\\s\\D+$", "").replaceAll("\\sFT2$", "").
+                replaceAll("\\s", ""));
+    }
+
+    /**
+     * Extract Quantity Type from the quantity field in BO Transaction report.
+     * The BO field is composed of a number and a Quantity String type. Remove
+     * all white space, minus signs, and digits.
+     *
+     * Quantity types used are: ACT; BAG; BOT; BOX; CAR; CAS; EA; FT; FT2; GAL;
+     * HR; KG; KM; KPC; KPK; L; LB; M; ML; MM; PAA; PAK; PC; QT; ROL; SET; TON
+     *
+     * @param tr
+     * @return Quantity type, e.g, PC
+     */
+    public static String extractQuantityType(TransactionBean tr) {
+//        Remove all white space, minus sign, and digits
+        return tr.getInvoiceQuantityT().replaceAll("\\s", "").
+                replaceAll("-", "").replaceAll("^\\d+\\.\\d+", "");
     }
 }

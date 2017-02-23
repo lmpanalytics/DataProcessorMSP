@@ -5,6 +5,7 @@
  */
 package com.tetrapak.dashboard.dataprocessor;
 
+import com.tetrapak.dashboard.database.Utilities;
 import java.io.FileReader;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -116,11 +117,9 @@ public class TransactionReader {
                 /* Extract qty to Double and Type */
                 if (tr.getInvoiceQuantityT() != null) {
 //                    Remove all Letters, white space
-                    qty = Double.parseDouble(tr.getInvoiceQuantityT().
-                            replaceAll("\\s\\D+$", "").replaceAll("\\s", ""));
+                    qty = Utilities.extractQuantity(tr);
 //                    Remove all white space, minus sign, and digits
-                    myType = tr.getInvoiceQuantityT().replaceAll("\\s", "").
-                            replaceAll("-", "").replaceAll("^\\d+\\.\\d+", "");
+                    myType = Utilities.extractQuantityType(tr);
 //                    If Type is KPC multiply qty with 1e3
                     if (myType.equals("KPC")) {
                         qty = 1e3 * qty;

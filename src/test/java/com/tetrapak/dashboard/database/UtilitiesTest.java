@@ -5,6 +5,8 @@
  */
 package com.tetrapak.dashboard.database;
 
+import com.tetrapak.dashboard.models.TransactionBean;
+import java.time.LocalDate;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -140,6 +142,70 @@ public class UtilitiesTest {
         assertEquals("Int. Account", Utilities.makeCustType("YAKULT"));
         assertEquals("Other", Utilities.makeCustType("DUMMY"));
         assertEquals("Other", Utilities.makeCustType(""));
+    }
+
+    /**
+     * Test of extractQuantity method, of class Utilities.
+     */
+    @Test
+    public void testExtractQuantity() {
+        System.out.println("extractQuantity");
+        TransactionBean tr = new TransactionBean();
+        
+        tr.setInvoiceQuantityT("100.0 PC");
+        double expResult = 100.0;
+        double result = Utilities.extractQuantity(tr);
+        assertEquals(expResult, result, 0.0);
+        
+        tr.setInvoiceQuantityT("100.0 FT2");
+        double expResult1 = 100.0;
+        double result1 = Utilities.extractQuantity(tr);
+        assertEquals(expResult1, result1, 0.0);
+        
+        tr.setInvoiceQuantityT("1 00.0 *");
+        double expResult2 = 100.0;
+        double result2 = Utilities.extractQuantity(tr);
+        assertEquals(expResult2, result2, 0.0);
+    }
+
+    /**
+     * Test of extractQuantityType method, of class Utilities.
+     */
+    @Test
+    public void testExtractQuantityType() {
+        System.out.println("extractQuantityType");
+        TransactionBean tr = new TransactionBean();
+        
+        tr.setInvoiceQuantityT("100.0 PC");
+        String expResult = "PC";
+        String result = Utilities.extractQuantityType(tr);
+        assertEquals(expResult, result);
+        
+        tr.setInvoiceQuantityT("100.0 FT2");
+        String expResult1 = "FT2";
+        String result1 = Utilities.extractQuantityType(tr);
+        assertEquals(expResult1, result1);
+        
+        tr.setInvoiceQuantityT("1 00.0 *");
+        String expResult2 = "*";
+        String result2 = Utilities.extractQuantityType(tr);
+        assertEquals(expResult2, result2);
+        
+        tr.setInvoiceQuantityT("1 00.0 ");
+        String expResult3 = "";
+        String result3 = Utilities.extractQuantityType(tr);
+        assertEquals(expResult3, result3);
+        
+        tr.setInvoiceQuantityT("1 00.0");
+        String expResult4 = "";
+        String result4 = Utilities.extractQuantityType(tr);
+        assertEquals(expResult4, result4);
+        
+        tr.setInvoiceQuantityT("100.0");
+        String expResult5 = "";
+        String result5 = Utilities.extractQuantityType(tr);
+        assertEquals(expResult5, result5);
+
     }
 
 }
