@@ -28,7 +28,7 @@ marketMap.put("AE",  new MarketBean("AE", "UNITED ARAB EMIRATES", "077", "UNITED
 marketMap.put("AF",  new MarketBean("AF", "AFGHANISTAN", "092", "AFGHANISTAN", "G094", "PAKISTAN", "GME&A"));
 marketMap.put("AL",  new MarketBean("AL", "ALBANIA", "034", "ALBANIA", "E033", "SOUTH EASTERN EUROPE", "E&CA"));
 marketMap.put("AM",  new MarketBean("AM", "ARMENIA", "061", "ARMENIA", "G032", "TURKEY AREA", "GME&A"));
-marketMap.put("AN",  new MarketBean("AN", "NETHERLANDS ANTILLES", "132", "PANAMA", "G132", "CENTRAL A. & CARIBBEAN", "NC&SA"));
+marketMap.put("AN",  new MarketBean("AN", "NETHERLANDS ANTILLES", "146", "NETHERLANDS ANTILLES", "G132", "CENTRAL A. & CARIBBEAN", "NC&SA"));
 marketMap.put("AO",  new MarketBean("AO", "ANGOLA", "270", "ANGOLA", "E021", "IBERIA", "E&CA"));
 marketMap.put("AR",  new MarketBean("AR", "ARGENTINA", "157", "ARGENTINA", "G157", "SOUTHERN CONE", "NC&SA"));
 marketMap.put("AT",  new MarketBean("AT", "AUSTRIA", "026", "AUSTRIA", "E009", "MID EUROPE", "E&CA"));
@@ -54,7 +54,7 @@ marketMap.put("CM",  new MarketBean("CM", "CAMEROON", "259", "CAMEROON", "G257",
 marketMap.put("CN",  new MarketBean("CN", "CHINA", "106", "CHINA", "G106", "GREATER CHINA", "GC"));
 marketMap.put("CO",  new MarketBean("CO", "COLOMBIA", "162", "COLOMBIA", "E162", "ANDINA", "NC&SA"));
 marketMap.put("CR",  new MarketBean("CR", "COSTA RICA", "131", "COSTA RICA", "G132", "CENTRAL A. & CARIBBEAN", "NC&SA"));
-marketMap.put("CU",  new MarketBean("CU", "CUBA", "132", "PANAMA", "G132", "CENTRAL A. & CARIBBEAN", "NC&SA"));
+marketMap.put("CU",  new MarketBean("CU", "CUBA", "134", "CUBA", "G132", "CENTRAL A. & CARIBBEAN", "NC&SA"));
 marketMap.put("CY",  new MarketBean("CY", "CYPRUS", "080", "CYPRUS", "E033", "SOUTH EASTERN EUROPE", "E&CA"));
 marketMap.put("CZ",  new MarketBean("CZ", "CZECH REPUBLIC", "047", "CZECH REPUBLIC", "E026", "POLAND & DANUBE", "E&CA"));
 marketMap.put("DE",  new MarketBean("DE", "GERMANY", "009", "GERMANY", "E009", "MID EUROPE", "E&CA"));
@@ -195,6 +195,7 @@ marketMap.put("SZ",  new MarketBean("SZ", "SWAZILAND", "272", "SOUTH AFRICA", "G
 marketMap.put("TG",  new MarketBean("TG", "TOGO", "257", "NIGERIA", "G257", "WEST AFRICA", "GME&A"));
 marketMap.put("VC",  new MarketBean("VC", "SAINT VINCENT AND THE GRENADINES", "132", "PANAMA", "G132", "CENTRAL A. & CARIBBEAN", "NC&SA"));
 marketMap.put("GB2",  new MarketBean("GB2", "NORTHERN IRELAND", "018", "NORTHERN IRELAND", "E017", "NORTH WEST EUROPE", "E&CA"));
+marketMap.put("XK",  new MarketBean("XK", "KOSOVO", "037", "KOSOVO", "E033", "SOUTH EASTERN EUROPE", "E&CA"));
     }
 
     public static Map<String, MarketBean> getMarketMap() {
