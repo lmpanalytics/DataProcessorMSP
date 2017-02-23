@@ -481,12 +481,14 @@ public class Transactions {
                 Double directCost = value.getDirectCost();
                 Double quantity = value.getInvoiceQuantity();
 
-//                Fix Blank Assortment Groups
+//                Fix 'Blank Assortment Groups', 'Vacant' and 'Other parts'
                 if (materialMap.containsKey(materialNumber)) {
 //              Look up assortment group
                     String globalAssortmentGrp = materialMap.get(materialNumber).
                             getAssortmentGroup();
-                    if (globalAssortmentGrp.equals("Blank assortment group")) {
+                    if (globalAssortmentGrp.equals("Blank assortment group")
+                            || globalAssortmentGrp.equals("Vacant")
+                            || globalAssortmentGrp.equals("Other parts")) {
 
                         /* Look up the assortment group used by the corresponding 
                     transaction market for this material number. 
@@ -500,10 +502,14 @@ public class Transactions {
                                     get(compKey).
                                     getAssortmentGroup();
 
-                            /*  If the local assortment group is not "Blank", update 
+                            /*  If the local assortment group is not "Blank", "Vacant" and "Other parts" update 
                     Local Assortment Group and MPG in the 'SOLD_ON' relationship. */
-                            if (!lookupLocalAssortmentGrp.equals(
-                                    "Blank assortment group")) {
+                            if (!lookupLocalAssortmentGrp.
+                                    equals("Blank assortment group")
+                                    && !lookupLocalAssortmentGrp.
+                                            equals("Vacant")
+                                    && !lookupLocalAssortmentGrp.
+                                            equals("Other parts")) {
                                 localAssortment = lookupLocalAssortmentGrp;
                                 localMPG = invoiceMap.get(compKey).getMpg();
 //                        System.out.printf("Re-assign %s of mtrl %s to %s and MPG %s\n", globalAssortmentGrp, materialNumber, localAssortment, localMPG);
