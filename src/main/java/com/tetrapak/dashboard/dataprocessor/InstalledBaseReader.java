@@ -96,6 +96,9 @@ public class InstalledBaseReader {
                 String myFinalCustomerKey = Utilities.createTPformatCustNo(
                         ib.getFinalCustomerKey());
 
+                String myCustomerName = Utilities.cleanCustomerName(ib.
+                        getFinalCustomerName());
+
                 String assortment = Utilities.assignAssortmentGroup(
                         myAssortmentConsumer);
 
@@ -103,7 +106,7 @@ public class InstalledBaseReader {
                 if (!myFinalCustomerKey.equals("#")) {
                     IB_MAP.put(keyCounter, new InstalledBaseBean(
                             ib.getCountryISOcode(), myFinalCustomerKey,
-                            ib.getFinalCustomerName(), myCustomerGroup,
+                            myCustomerName, myCustomerGroup,
                             assortment, ib.getPotSpareParts(),
                             ib.getPotMaintenanceHrs(), ib.getPotMaintenance()));
                 }

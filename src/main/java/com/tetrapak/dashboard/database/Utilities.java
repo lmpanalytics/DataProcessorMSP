@@ -151,15 +151,14 @@ public class Utilities {
      * Quantity types used are: ACT; BAG; BOT; BOX; CAR; CAS; EA; FT; FT2; GAL;
      * HR; KG; KM; KPC; KPK; L; LB; M; ML; MM; PAA; PAK; PC; QT; ROL; SET; TON
      *
-     * @param tr
-     * @return numerical quantity
+     * @param qtyString the combined quantity and type string, e.g, '100.0 PC'
+     * @return numerical quantity, e.g., '100.0'
      * @throws NumberFormatException
      */
-    public static double extractQuantity(TransactionBean tr) throws NumberFormatException {
+    public static double extractQuantity(String qtyString) throws NumberFormatException {
 //        Remove all Letters, white space
-        return Double.parseDouble(tr.getInvoiceQuantityT().
-                replaceAll("\\s\\D+$", "").replaceAll("\\sFT2$", "").
-                replaceAll("\\s", ""));
+        return Double.parseDouble(qtyString.replaceAll("\\s\\D+$", "").
+                replaceAll("\\sFT2$", "").replaceAll("\\s", ""));
     }
 
     /**
@@ -170,12 +169,22 @@ public class Utilities {
      * Quantity types used are: ACT; BAG; BOT; BOX; CAR; CAS; EA; FT; FT2; GAL;
      * HR; KG; KM; KPC; KPK; L; LB; M; ML; MM; PAA; PAK; PC; QT; ROL; SET; TON
      *
-     * @param tr
+     * @param qtyString the combined quantity and type string, e.g, '100.0 PC'
      * @return Quantity type, e.g, PC
      */
-    public static String extractQuantityType(TransactionBean tr) {
+    public static String extractQuantityType(String qtyString) {
 //        Remove all white space, minus sign, and digits
-        return tr.getInvoiceQuantityT().replaceAll("\\s", "").
-                replaceAll("-", "").replaceAll("^\\d+\\.\\d+", "");
+        return qtyString.replaceAll("\\s", "").replaceAll("-", "").
+                replaceAll("^\\d+\\.\\d+", "");
+    }
+
+    /**
+     * Fix read error by removing ' and " from customer names
+     *
+     * @param name
+     * @return clean name
+     */
+    public static String cleanCustomerName(String name) {
+        return name.replaceAll("'", "").replaceAll("\"", "");
     }
 }

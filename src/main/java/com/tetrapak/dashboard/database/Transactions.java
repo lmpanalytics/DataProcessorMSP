@@ -314,9 +314,8 @@ public class Transactions {
             TransactionBean value = entry.getValue();
 
             String customerNumber = value.getFinalCustomerKey();
-//                Fix read error by removing "'" from customer names
-            String customerName = value.getFinalCustomerName().replaceAll(
-                    "'", "");
+            String customerName = Utilities.cleanCustomerName(
+                    value.getFinalCustomerName());
             String customerGroup = value.getCustomerGroup();
             String customerType = Utilities.makeCustType(customerGroup);
 
@@ -499,8 +498,7 @@ public class Transactions {
 //                    Handle null pointer exception
                         if (invoiceMap.containsKey(compKey)) {
                             String lookupLocalAssortmentGrp = invoiceMap.
-                                    get(compKey).
-                                    getAssortmentGroup();
+                                    get(compKey).getAssortmentGroup();
 
                             /*  If the local assortment group is not "Blank", "Vacant" and "Other parts" update 
                     Local Assortment Group and MPG in the 'SOLD_ON' relationship. */
@@ -518,6 +516,7 @@ public class Transactions {
                     }
                 } else {
                     System.err.println(
+//                            Material is missing as it is cancelled out in a reverse transaction
                             ">> WARNING: Global materialMap is missing material: " + materialNumber + "");
                 }
 

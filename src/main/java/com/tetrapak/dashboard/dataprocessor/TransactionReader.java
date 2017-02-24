@@ -117,9 +117,9 @@ public class TransactionReader {
                 /* Extract qty to Double and Type */
                 if (tr.getInvoiceQuantityT() != null) {
 //                    Remove all Letters, white space
-                    qty = Utilities.extractQuantity(tr);
+                    qty = Utilities.extractQuantity(tr.getInvoiceQuantityT());
 //                    Remove all white space, minus sign, and digits
-                    myType = Utilities.extractQuantityType(tr);
+                    myType = Utilities.extractQuantityType(tr.getInvoiceQuantityT());
 //                    If Type is KPC multiply qty with 1e3
                     if (myType.equals("KPC")) {
                         qty = 1e3 * qty;

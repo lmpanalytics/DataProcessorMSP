@@ -149,23 +149,10 @@ public class UtilitiesTest {
      */
     @Test
     public void testExtractQuantity() {
-        System.out.println("extractQuantity");
-        TransactionBean tr = new TransactionBean();
-        
-        tr.setInvoiceQuantityT("100.0 PC");
-        double expResult = 100.0;
-        double result = Utilities.extractQuantity(tr);
-        assertEquals(expResult, result, 0.0);
-        
-        tr.setInvoiceQuantityT("100.0 FT2");
-        double expResult1 = 100.0;
-        double result1 = Utilities.extractQuantity(tr);
-        assertEquals(expResult1, result1, 0.0);
-        
-        tr.setInvoiceQuantityT("1 00.0 *");
-        double expResult2 = 100.0;
-        double result2 = Utilities.extractQuantity(tr);
-        assertEquals(expResult2, result2, 0.0);
+        System.out.println("extractQuantity");        
+        assertEquals(100.0, Utilities.extractQuantity("100.0 PC"), 0.0);
+        assertEquals(100.0, Utilities.extractQuantity("100.0 FT2"), 0.0);
+        assertEquals(100.0, Utilities.extractQuantity("1 00.0 *"), 0.0);
     }
 
     /**
@@ -174,37 +161,24 @@ public class UtilitiesTest {
     @Test
     public void testExtractQuantityType() {
         System.out.println("extractQuantityType");
-        TransactionBean tr = new TransactionBean();
-        
-        tr.setInvoiceQuantityT("100.0 PC");
-        String expResult = "PC";
-        String result = Utilities.extractQuantityType(tr);
-        assertEquals(expResult, result);
-        
-        tr.setInvoiceQuantityT("100.0 FT2");
-        String expResult1 = "FT2";
-        String result1 = Utilities.extractQuantityType(tr);
-        assertEquals(expResult1, result1);
-        
-        tr.setInvoiceQuantityT("1 00.0 *");
-        String expResult2 = "*";
-        String result2 = Utilities.extractQuantityType(tr);
-        assertEquals(expResult2, result2);
-        
-        tr.setInvoiceQuantityT("1 00.0 ");
-        String expResult3 = "";
-        String result3 = Utilities.extractQuantityType(tr);
-        assertEquals(expResult3, result3);
-        
-        tr.setInvoiceQuantityT("1 00.0");
-        String expResult4 = "";
-        String result4 = Utilities.extractQuantityType(tr);
-        assertEquals(expResult4, result4);
-        
-        tr.setInvoiceQuantityT("100.0");
-        String expResult5 = "";
-        String result5 = Utilities.extractQuantityType(tr);
-        assertEquals(expResult5, result5);
+        assertEquals("PC", Utilities.extractQuantityType("100.0 PC"));
+        assertEquals("FT2", Utilities.extractQuantityType("100.0 FT2"));
+        assertEquals("*", Utilities.extractQuantityType("1 00.0 *"));
+        assertEquals("", Utilities.extractQuantityType("1 00.0 "));
+        assertEquals("", Utilities.extractQuantityType("1 00.0"));
+        assertEquals("", Utilities.extractQuantityType("100.0"));
+    }
+
+    /**
+     * Test of cleanCustomerName method, of class Utilities.
+     */
+    @Test
+    public void testCleanCustomerName() {
+        System.out.println("cleanCustomerName");
+        assertEquals("test", Utilities.cleanCustomerName("test"));
+        assertEquals("customer has name", Utilities.cleanCustomerName("customer \"has\" name"));
+        assertEquals("customer has name", Utilities.cleanCustomerName("customer 'has' name"));
+        assertEquals("customer has name", Utilities.cleanCustomerName("customer \"\"has\"\" name"));
 
     }
 
