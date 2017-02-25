@@ -153,6 +153,7 @@ public class UtilitiesTest {
         assertEquals(100.0, Utilities.extractQuantity("100.0 PC"), 0.0);
         assertEquals(100.0, Utilities.extractQuantity("100.0 FT2"), 0.0);
         assertEquals(100.0, Utilities.extractQuantity("1 00.0 *"), 0.0);
+        assertEquals(0.0, Utilities.extractQuantity("*"), 0.0);
     }
 
     /**
@@ -164,6 +165,7 @@ public class UtilitiesTest {
         assertEquals("PC", Utilities.extractQuantityType("100.0 PC"));
         assertEquals("FT2", Utilities.extractQuantityType("100.0 FT2"));
         assertEquals("*", Utilities.extractQuantityType("1 00.0 *"));
+        assertEquals("*", Utilities.extractQuantityType("*"));
         assertEquals("", Utilities.extractQuantityType("1 00.0 "));
         assertEquals("", Utilities.extractQuantityType("1 00.0"));
         assertEquals("", Utilities.extractQuantityType("100.0"));

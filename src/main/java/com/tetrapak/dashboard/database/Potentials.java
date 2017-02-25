@@ -6,6 +6,7 @@
 package com.tetrapak.dashboard.database;
 
 import com.tetrapak.dashboard.models.InstalledBaseBean;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
 import org.neo4j.driver.v1.Session;
+import org.neo4j.driver.v1.Transaction;
 import org.neo4j.driver.v1.Values;
 
 import org.neo4j.driver.v1.exceptions.ClientException;
@@ -45,6 +47,14 @@ public class Potentials {
                 installedBaseMap);
 
         try (Session session = driver.session()) {
+
+            try (Transaction tx1 = session.beginTransaction()) {
+//              Run multiple statements
+                tx1.run("CREATE INDEX ON :InstalledBase(id)");
+                tx1.run("CREATE INDEX ON :InstalledBase(name)");
+
+                tx1.success();
+            }
 
             int eqCounter = 0;
 
@@ -219,7 +229,9 @@ public class Potentials {
      */
     public void closeNeo4jDriver() {
         driver.close();
-        System.out.println("Closed the driver in Potentials class.");
+        Timestamp timestampEnd = new Timestamp(System.currentTimeMillis());
+        System.out.println(
+                timestampEnd + " :: Closed the driver in Potentials class.");
     }
 
 }

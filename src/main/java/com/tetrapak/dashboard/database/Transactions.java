@@ -12,6 +12,7 @@ import com.tetrapak.dashboard.models.MarketBean;
 import com.tetrapak.dashboard.models.MaterialBean;
 import com.tetrapak.dashboard.models.ReferencePartBean;
 import com.tetrapak.dashboard.models.TransactionBean;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
@@ -130,8 +131,8 @@ public class Transactions {
                         tx1.run("CREATE CONSTRAINT ON (cy:Country)"
                                 + " ASSERT cy.countryId IS UNIQUE");
                         tx1.run("CREATE INDEX ON :Cluster(name)");
-                        tx1.run("CREATE INDEX ON :MarketGroup(mktGroupCode)");
-                        tx1.run("CREATE INDEX ON :Market(mktCode)");
+                        tx1.run("CREATE INDEX ON :MarketGroup(id)");
+                        tx1.run("CREATE INDEX ON :Market(mktId)");
 
                         tx1.success();
                         setIndex = false;
@@ -375,6 +376,10 @@ public class Transactions {
 //              Run multiple statements
                         tx1.run("CREATE CONSTRAINT ON (c:Customer)"
                                 + " ASSERT c.id IS UNIQUE");
+                        tx1.run("CREATE INDEX ON :Customer(isSourceBO)");
+                        tx1.run("CREATE INDEX ON :Customer(Type)");
+                        tx1.run("CREATE INDEX ON :Customer(Name)");
+                        tx1.run("CREATE INDEX ON :Customer(custGroup)");
 
                         tx1.success();
                         setIndex = false;
@@ -516,7 +521,7 @@ public class Transactions {
                     }
                 } else {
                     System.err.println(
-//                            Material is missing as it is cancelled out in a reverse transaction
+                            //                            Material is missing as it is cancelled out in a reverse transaction
                             ">> WARNING: Global materialMap is missing material: " + materialNumber + "");
                 }
 
@@ -595,6 +600,8 @@ public class Transactions {
      */
     public void closeNeo4jDriver() {
         driver.close();
-        System.out.println("Closed the driver in Transactions class.");
+        Timestamp timestampEnd = new Timestamp(System.currentTimeMillis());
+        System.out.println(
+                timestampEnd + " :: Closed the driver in Transactions class.");
     }
 }

@@ -158,7 +158,8 @@ public class Utilities {
     public static double extractQuantity(String qtyString) throws NumberFormatException {
 //        Remove all Letters, white space
         return Double.parseDouble(qtyString.replaceAll("\\s\\D+$", "").
-                replaceAll("\\sFT2$", "").replaceAll("\\s", ""));
+                replaceAll("\\sFT2$", "").replaceAll("\\*", "0.0").
+                replaceAll("\\s", ""));
     }
 
     /**
