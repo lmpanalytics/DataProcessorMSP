@@ -78,22 +78,22 @@ public class Main {
             trx.createServiceCategories();
 
 //            Make timeline tree (approximately 1 sec)
-            trx.makeTimeLineTree(makeThreeYearDateList());
+//            trx.makeTimeLineTree(makeThreeYearDateList());
 
 //            Load global market structure (approximately 3 sec)
             trx.loadMarketData(mkt);
 
             /* Load global material master and assign Reference part mapping (approximately 2.5 minutes) */
-            trx.loadMaterialData(mtrl, refMtrl);
+//            trx.loadMaterialData(mtrl, refMtrl);
 
 //            Load customer data (approximately 1 sec)
-            trx.loadCustomerData(tr, ib);
+//            trx.loadCustomerData(tr, ib);
 
 //            Load transactions (approximately 15 sec)
-            trx.loadTransactionData(tr, inv, mtrl);
+//            trx.loadTransactionData(tr, inv, mtrl);
             
 //            Load potentials (approximately xxx sec)
-            pot.loadPotentialsData(ib);
+//            pot.loadPotentialsData(ib);
             
             Timestamp timestampEnd = new Timestamp(System.currentTimeMillis());
             System.out.println(timestampEnd + " :: Finished data load process.");            

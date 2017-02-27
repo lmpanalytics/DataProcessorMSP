@@ -110,7 +110,6 @@ public class Transactions {
 
             int transactionCounter = 0;
             boolean setIndex = true;
-            String globalMktID = "dashboard";
 
             for (Map.Entry<String, MarketBean> entry : marketMap.entrySet()) {
                 String key = entry.getKey();
@@ -128,24 +127,23 @@ public class Transactions {
                 while (setIndex) {
                     try (Transaction tx1 = session.beginTransaction()) {
 //              Run multiple statements
-                        tx1.run("CREATE CONSTRAINT ON (cy:Country)"
+                        tx1.run("CREATE CONSTRAINT ON (cy:CountryDB)"
                                 + " ASSERT cy.countryId IS UNIQUE");
-                        tx1.run("CREATE INDEX ON :Cluster(name)");
-                        tx1.run("CREATE INDEX ON :MarketGroup(id)");
-                        tx1.run("CREATE INDEX ON :Market(mktId)");
+                        tx1.run("CREATE INDEX ON :ClusterDB(name)");
+                        tx1.run("CREATE INDEX ON :MarketGroup(mktGrpId)");
+                        tx1.run("CREATE INDEX ON :MarketDB(mktId)");
+ 
 
                         tx1.success();
                         setIndex = false;
                     }
                 }
 
-                String tx2 = "MERGE (g:GlobalMkt { id: {globalMktID}, name:'GLOBAL MARKET'})"
-                        + " MERGE ((g)-[:CLUSTER]->(c:Cluster { name:{cluster}}))"
-                        + " MERGE ((c)-[:MARKETGROUP]->(mgrp:MarketGroup {id: {mktGroupCode}, name: {mktGroupName}}))"
-                        + " MERGE ((mgrp)-[:MARKET]->(mkt:Market:Country {mktId: {mktCode}, mktName: {mktName}, countryId: {isoCountryCode}, countryName: {countryName}}))";
+                String tx2 = "MERGE (c:ClusterDB { name:{cluster}})"
+                        + " MERGE (c)<-[:MEMBER_OF]-(mgrp:MarketGroup {mktGrpId: {mktGroupCode}, name: {mktGroupName}})"
+                        + " MERGE ((mgrp)<-[:MEMBER_OF]-(mkt:MarketDB:CountryDB {mktId: {mktCode}, mktName: {mktName}, countryId: {isoCountryCode}, countryName: {countryName}}))";
 
                 session.run(tx2, Values.parameters(
-                        "globalMktID", globalMktID,
                         "cluster", cluster,
                         "mktGroupCode", mktGroupCode,
                         "mktGroupName", mktGroupName,
