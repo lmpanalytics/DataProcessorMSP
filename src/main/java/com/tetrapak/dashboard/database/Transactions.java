@@ -132,7 +132,6 @@ public class Transactions {
                         tx1.run("CREATE INDEX ON :ClusterDB(name)");
                         tx1.run("CREATE INDEX ON :MarketGroup(mktGrpId)");
                         tx1.run("CREATE INDEX ON :MarketDB(mktId)");
- 
 
                         tx1.success();
                         setIndex = false;
@@ -164,12 +163,9 @@ public class Transactions {
     }
 
     /**
-     * Loads and creates Nodes for Assortment Groups, MPGs, Material Names, and
-     * Material Numbers. An exception is thrown and the program exits in case
-     * the value-data change in the Material Map vs. the database content.
-     *
-     * Information regarding the grouping of materials according to reference
-     * parts is added to the Material nodes.
+     * Loads and creates Nodes for Reference parts. An exception is thrown and
+     * the program exits in case the value-data change in the Material Map vs.
+     * the database content.
      *
      * @param materialMap containing the Material-Key, and Values of
      * Material-Number, -Name, MPG, and Assortment Group
@@ -198,7 +194,7 @@ public class Transactions {
                 String assortment = value.getAssortmentGroup();
 
 //                Lookup and assign the refence material name
-                String refName = "";
+                String refName = "Other";
                 if (refMtrlMap.containsKey(mtrlNumber)) {
                     refName = refMtrlMap.get(mtrlNumber).getRefMaterialName();
                 }
@@ -206,27 +202,26 @@ public class Transactions {
                 while (setIndex) {
                     try (Transaction tx1 = session.beginTransaction()) {
 //              Run multiple statements
-                        tx1.run("CREATE CONSTRAINT ON (mtrl:Material)"
-                                + " ASSERT mtrl.id IS UNIQUE");
+//                        tx1.run("CREATE CONSTRAINT ON (mtrl:Material) ASSERT mtrl.id IS UNIQUE");
                         tx1.run("CREATE INDEX ON :Assortment(name)");
                         tx1.run("CREATE INDEX ON :Mpg(name)");
+                        tx1.run("CREATE INDEX ON :RefMaterial(refName)");
 
                         tx1.success();
                         setIndex = false;
                     }
                 }
 
-                String tx2 = "MERGE (g:GlobalMtrl { id: {globalMtrlID}, name:'GLOBAL MATERIAL'})"
-                        + " MERGE ((g)-[:ASSORTMENT]->(a:Assortment { name: {assortment}}))"
-                        + " MERGE ((a)-[:MPG]->(mpg:Mpg { name: {mpg}}))"
-                        + " MERGE ((mpg)-[:MATERIAL]->(mtrl:Material { id: {mtrlNumber}, name: {mtrlName}, refMtrlName: {refName}}))";
+                String tx2 = "MERGE (:Assortment { name: {assortment}})"
+                        + " MERGE (:Mpg { name: {mpg}})"
+                        + " MERGE (:RefMaterial { refMtrlName: {refName}})";
 
                 session.run(tx2, Values.parameters(
-                        "globalMtrlID", globalMtrlID,
+                        //                        "globalMtrlID", globalMtrlID,
                         "assortment", assortment,
                         "mpg", mpg,
-                        "mtrlNumber", mtrlNumber,
-                        "mtrlName", mtrlName,
+                        //                        "mtrlNumber", mtrlNumber,
+                        //                        "mtrlName", mtrlName,
                         "refName", refName
                 ));
 
