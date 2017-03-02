@@ -16,7 +16,6 @@ import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
 import org.neo4j.driver.v1.Session;
-import org.neo4j.driver.v1.Transaction;
 import org.neo4j.driver.v1.Values;
 
 import org.neo4j.driver.v1.exceptions.ClientException;
@@ -33,9 +32,9 @@ public class Potentials {
             AuthTokens.basic(Utilities.myUserName(), Utilities.myPassword()));
 
     /**
-     * Loads and creates Nodes for Installed Base representing potentials. An
-     * exception is thrown and the program exits in case the value-data change
-     * in the Material Map vs. the database content.
+     * Loads and creates a Relationship representing Potentials between
+     * Assortment Nodes and Customers, having IB. Creates the 'Located_In'
+     * relationship between the Customer and the Country.
      *
      * @param installedBaseMap containing the countryISOcode-Key, and Values of
      * countryISOcode, finalCustomerKey, assortmentConsumer, potSpareParts,
@@ -47,14 +46,6 @@ public class Potentials {
                 installedBaseMap);
 
         try (Session session = driver.session()) {
-
-            try (Transaction tx1 = session.beginTransaction()) {
-//              Run multiple statements
-                tx1.run("CREATE INDEX ON :InstalledBase(id)");
-                tx1.run("CREATE INDEX ON :InstalledBase(name)");
-
-                tx1.success();
-            }
 
             int eqCounter = 0;
 
@@ -68,10 +59,11 @@ public class Potentials {
                 double mtHourPotential = value.getPotMaintenanceHrs();
                 double mtEurPotential = value.getPotMaintenance();
 
-                String tx2 = " MATCH (fc:Customer {id: {customerNumber}})"
-                        + " MATCH (c:Country {countryId: {countryCode}})"
+                String tx2 = " MATCH (fc:Customer {id: {customerNumber}}),"
+                        + " (c:CountryDB {countryId: {countryCode}})"
+                        + " MERGE (a:Assortment {name: {assortmentConsumer}})"
                         + " MERGE (fc)-[:LOCATED_IN]->(c)"
-                        + " MERGE (ib:InstalledBase {id: {customerNumber}, name: {assortmentConsumer}})-[:POTENTIAL {spEurPotential: {spEurPotential}, mtHourPotential: {mtHourPotential}, mtEurPotential: {mtEurPotential}}]->(fc)";
+                        + " MERGE (a)-[:POTENTIAL_AT {spEurPotential: {spEurPotential}, mtHourPotential: {mtHourPotential}, mtEurPotential: {mtEurPotential}}]->(fc)";
 
                 session.run(tx2, Values.parameters(
                         "customerNumber", customerNumber,
@@ -80,15 +72,6 @@ public class Potentials {
                         "spEurPotential", spEurPotential,
                         "mtHourPotential", mtHourPotential,
                         "mtEurPotential", mtEurPotential
-                ));
-
-                String tx3 = " MATCH (a:Assortment {name: {assortmentConsumer}})"
-                        + " MATCH (ib:InstalledBase {id: {customerNumber}, name: {assortmentConsumer}})"
-                        + " MERGE (a)-[:FOR]->(ib)";
-
-                session.run(tx3, Values.parameters(
-                        "assortmentConsumer", assortmentConsumer,
-                        "customerNumber", customerNumber
                 ));
 
                 eqCounter++;

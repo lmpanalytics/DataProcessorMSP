@@ -77,7 +77,7 @@ public class Main {
 //            Create service categories (approximately 1 sec)
             trx.createServiceCategories();
 
-//            Make timeline tree (approximately 1 sec)
+//            DO NOT USE THIS >>> Make timeline tree (approximately 1 sec)
 //            trx.makeTimeLineTree(makeThreeYearDateList());
 
 //            Load global market structure (approximately 3 sec)
@@ -93,7 +93,7 @@ public class Main {
             trx.loadTransactionData(tr, inv, mtrl, refMtrl);
             
 //            Load potentials (approximately xxx sec)
-//            pot.loadPotentialsData(ib);
+            pot.loadPotentialsData(ib);
             
             Timestamp timestampEnd = new Timestamp(System.currentTimeMillis());
             System.out.println(timestampEnd + " :: Finished data load process.");            
