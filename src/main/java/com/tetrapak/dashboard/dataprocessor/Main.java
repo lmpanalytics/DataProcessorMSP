@@ -75,22 +75,22 @@ public class Main {
             Map<Integer, InvoiceBean> inv = InvoiceReader.getINVOICE_MAP();
 
 //            Create service categories (approximately 1 sec)
-//            trx.createServiceCategories();
+            trx.createServiceCategories();
 
 //            Make timeline tree (approximately 1 sec)
 //            trx.makeTimeLineTree(makeThreeYearDateList());
 
 //            Load global market structure (approximately 3 sec)
-//            trx.loadMarketData(mkt);
+            trx.loadMarketData(mkt);
 
-            /* Load global material master and assign Reference part mapping (approximately 2.5 minutes) */
-            trx.loadMaterialData(mtrl, refMtrl);
+            /* DO NOT USE THIS >>> Load global material master and assign Reference part mapping (approximately 2.5 minutes) */
+//            trx.loadMaterialData(mtrl, refMtrl);
 
 //            Load customer data (approximately 1 sec)
-//            trx.loadCustomerData(tr, ib);
+            trx.loadCustomerData(tr, ib);
 
 //            Load transactions (approximately 15 sec)
-//            trx.loadTransactionData(tr, inv, mtrl);
+            trx.loadTransactionData(tr, inv, mtrl, refMtrl);
             
 //            Load potentials (approximately xxx sec)
 //            pot.loadPotentialsData(ib);

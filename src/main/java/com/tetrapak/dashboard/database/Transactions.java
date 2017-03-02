@@ -163,9 +163,7 @@ public class Transactions {
     }
 
     /**
-     * Loads and creates Nodes for Reference parts. An exception is thrown and
-     * the program exits in case the value-data change in the Material Map vs.
-     * the database content.
+     * Loads and creates Nodes for Reference parts, MPGs and Assortments.
      *
      * @param materialMap containing the Material-Key, and Values of
      * Material-Number, -Name, MPG, and Assortment Group
@@ -205,7 +203,7 @@ public class Transactions {
 //                        tx1.run("CREATE CONSTRAINT ON (mtrl:Material) ASSERT mtrl.id IS UNIQUE");
                         tx1.run("CREATE INDEX ON :Assortment(name)");
                         tx1.run("CREATE INDEX ON :Mpg(name)");
-                        tx1.run("CREATE INDEX ON :RefMaterial(refName)");
+                        tx1.run("CREATE INDEX ON :RefMaterial(refMtrlName)");
 
                         tx1.success();
                         setIndex = false;
@@ -408,19 +406,23 @@ public class Transactions {
     }
 
     /**
-     * Creates Relationships between sales transaction data: Date, Service
-     * Category (Finance), Market Number, Final Customer Number, and Material
-     * Number.
+     * Creates the Sales Transaction Nodes and Relationships between sales
+     * transaction data: Service Category (Finance), Market Number, Final
+     * Customer Number, Assortment, MPG, and Reference Parts.
      *
      * @param transactionMap contains values from the Special Ledger Report.
      * @param invoiceMap containing the Market and Material Composite Key, and
      * Values of MarketKey Material Number, Assortment Group, and MPG.
      * @param materialMap containing the Material Number Key, and values of
      * Material-Number, -Name, MPG, and the Assortment Group.
+     * @param refMtrlMap containing the Reference Material Key, and value of the
+     * Reference material name
      */
-    public void loadTransactionData(Map<Integer, TransactionBean> transactionMap,
+    public void loadTransactionData(
+            Map<Integer, TransactionBean> transactionMap,
             Map<Integer, InvoiceBean> invoiceMap,
-            Map<String, MaterialBean> materialMap) {
+            Map<String, MaterialBean> materialMap,
+            Map<String, ReferencePartBean> refMtrlMap) {
 
         try (Session session = driver.session()) {
 
@@ -461,11 +463,15 @@ public class Transactions {
 
             for (Map.Entry<Integer, TransactionBean> entry : transactionMap.
                     entrySet()) {
-//                Integer key = entry.getKey();
+                Integer key = entry.getKey();
                 TransactionBean value = entry.getValue();
-                String localAssortment = "";
-                String localMPG = "";
+//                Initialize variables
+                boolean setIndex = true;
+                String referenceMtrlName = "Other";
+                String globalAssortmentGrp = "Blank assortment group";
+                String globalMpg = "Not assigned";
 
+//              Get data
                 LocalDate date = value.getDate();
                 int year = date.getYear();
                 int month = date.getMonthValue();
@@ -478,11 +484,12 @@ public class Transactions {
                 Double directCost = value.getDirectCost();
                 Double quantity = value.getInvoiceQuantity();
 
-//                Fix 'Blank Assortment Groups', 'Vacant' and 'Other parts'
+//                Reduce 'Blank Assortment Groups', 'Vacant' and 'Other parts'
                 if (materialMap.containsKey(materialNumber)) {
 //              Look up assortment group
-                    String globalAssortmentGrp = materialMap.get(materialNumber).
+                    globalAssortmentGrp = materialMap.get(materialNumber).
                             getAssortmentGroup();
+                    globalMpg = materialMap.get(materialNumber).getMpg();
                     if (globalAssortmentGrp.equals("Blank assortment group")
                             || globalAssortmentGrp.equals("Vacant")
                             || globalAssortmentGrp.equals("Other parts")) {
@@ -498,51 +505,79 @@ public class Transactions {
                             String lookupLocalAssortmentGrp = invoiceMap.
                                     get(compKey).getAssortmentGroup();
 
-                            /*  If the local assortment group is not "Blank", "Vacant" and "Other parts" update 
-                    Local Assortment Group and MPG in the 'SOLD_ON' relationship. */
+                            /*  If the local assortment group is not "Blank", 
+                            "Vacant" and "Other parts" use the local lookup 
+                            value for the Global Assortment Group and MPG. */
                             if (!lookupLocalAssortmentGrp.
                                     equals("Blank assortment group")
                                     && !lookupLocalAssortmentGrp.
                                             equals("Vacant")
                                     && !lookupLocalAssortmentGrp.
                                             equals("Other parts")) {
-                                localAssortment = lookupLocalAssortmentGrp;
-                                localMPG = invoiceMap.get(compKey).getMpg();
-//                        System.out.printf("Re-assign %s of mtrl %s to %s and MPG %s\n", globalAssortmentGrp, materialNumber, localAssortment, localMPG);
+                                globalAssortmentGrp = lookupLocalAssortmentGrp;
+                                globalMpg = invoiceMap.get(compKey).getMpg();
+//                        System.out.printf("Re-assign mtrl %s to Assortment %s and MPG %s\n", materialNumber, globalAssortmentGrp, globalMpg);
                             }
                         }
                     }
                 } else {
+//          Material is missing as it is cancelled out in a reverse transaction
                     System.err.println(
-                            //                            Material is missing as it is cancelled out in a reverse transaction
                             ">> WARNING: Global materialMap is missing material: " + materialNumber + "");
                 }
 
-                String tx2 = "MATCH (d:Day {year: {year}, month: {month}, dayOfMonth: {day}})"
-                        + " MATCH (mtr:Material { id: {materialNumber}})"
-                        + " MATCH (fc:Customer {id: {customerNumber}})"
-                        + " MATCH (cat:ServiceCategory {name: {category}})"
-                        + " MATCH (mkt:Market {mktId: {marketNumber}})"
-                        + " MERGE ((d)<-[:SOLD_ON {custNumber: {customerNumber}, marketNumber: {marketNumber}, localAssortmentGrp: {localAssortment}, localMPG: {localMPG}, netSales: {netSales}, directCost: {directCost}, quantity: {quantity}}]-(mtr))"
-                        + " MERGE ((mtr)-[:FOR_FINAL_CUSTOMER]->(fc))"
-                        + " MERGE ((mtr)-[:OF_CATEGORY]->(cat))"
-                        + " MERGE ((mtr)-[:SOLD_FROM]->(mkt))"
-                        + " MERGE ((fc)-[:LOCATED_IN]->(mkt))";
+                /* Look up the reference material, if any, mapped to the corresponding 
+                     material number. This information is in the refMtrlMap. */
+                //                    Handle null pointer exception
+                if (refMtrlMap.containsKey(materialNumber)) {
+                    referenceMtrlName = refMtrlMap.get(materialNumber).
+                            getRefMaterialName();
+                }
+
+                while (setIndex) {
+                    try (Transaction tx1 = session.beginTransaction()) {
+//              Run multiple statements
+                        tx1.run("CREATE INDEX ON :Assortment(name)");
+                        tx1.run("CREATE INDEX ON :Mpg(name)");
+                        tx1.run("CREATE INDEX ON :RefMaterial(refMtrlName)");
+
+                        tx1.success();
+                        setIndex = false;
+                    }
+                }
+
+                String tx2 = "MATCH (fc:Customer {id: {customerNumber}}),"
+                        + " (cat:ServiceCategory {name: {category}}),"
+                        + " (mkt:MarketDB {mktId: {marketNumber}})"
+                        /* Create Reference materials, Assortments and MPGs */
+                        + " MERGE (ref:RefMaterial {refMtrlName: {refMtrlName}})"
+                        + " MERGE (a:Assortment {name: {globalAssortmentGrp}})"
+                        + " MERGE (mpg:Mpg {name: {globalMpg}})"
+                        /* Create Transactions and relationships */
+                        + " MERGE (t:Transaction {trId: {trId}, year: {year}, month: {month}, dayOfMonth: {day}})"
+                        + " MERGE (t)-[:FOR {netSales: {netSales}, directCost: {directCost}, quantity: {quantity}}]->(fc)"
+                        + " MERGE (a)-[:IN]->(t)"
+                        + " MERGE (mpg)-[:IN]->(t)"
+                        + " MERGE (ref)-[:IN]->(t)"
+                        + " MERGE (t)-[:BOOKED_AS]->(cat)"
+                        + " MERGE (mkt)-[:MADE]->(t)";
 
                 session.run(tx2, Values.parameters(
-                        "year", year,
-                        "month", month,
-                        "day", day,
-                        "materialNumber", materialNumber,
+                        "refMtrlName", referenceMtrlName,
+                        "globalAssortmentGrp", globalAssortmentGrp,
+                        "globalMpg", globalMpg,
                         "customerNumber", customerNumber,
                         "category", category,
                         "marketNumber", marketNumber,
-                        "localAssortment", localAssortment,
-                        "localMPG", localMPG,
+                        "trId", key,
+                        "year", year,
+                        "month", month,
+                        "day", day,
                         "netSales", netSales,
                         "directCost", directCost,
                         "quantity", quantity
                 ));
+
                 transactionCounter++;
             }
             System.out.format("Processed %d sales transactions.\n",
