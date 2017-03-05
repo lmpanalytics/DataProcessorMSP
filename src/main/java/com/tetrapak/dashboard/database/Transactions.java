@@ -131,7 +131,10 @@ public class Transactions {
                                 + " ASSERT cy.countryId IS UNIQUE");
                         tx1.run("CREATE INDEX ON :ClusterDB(name)");
                         tx1.run("CREATE INDEX ON :MarketGroup(mktGrpId)");
+                        tx1.run("CREATE INDEX ON :MarketGroup(name)");
                         tx1.run("CREATE INDEX ON :MarketDB(mktId)");
+                        tx1.run("CREATE INDEX ON :MarketDB(mktName)");
+                        tx1.run("CREATE INDEX ON :CountryDB(countryName)");
 
                         tx1.success();
                         setIndex = false;
@@ -369,8 +372,8 @@ public class Transactions {
                         tx1.run("CREATE CONSTRAINT ON (c:Customer)"
                                 + " ASSERT c.id IS UNIQUE");
                         tx1.run("CREATE INDEX ON :Customer(isSourceBO)");
-                        tx1.run("CREATE INDEX ON :Customer(Type)");
-                        tx1.run("CREATE INDEX ON :Customer(Name)");
+                        tx1.run("CREATE INDEX ON :Customer(custType)");
+                        tx1.run("CREATE INDEX ON :Customer(name)");
                         tx1.run("CREATE INDEX ON :Customer(custGroup)");
 
                         tx1.success();
@@ -538,9 +541,14 @@ public class Transactions {
                 while (setIndex) {
                     try (Transaction tx1 = session.beginTransaction()) {
 //              Run multiple statements
+                        tx1.run("CREATE CONSTRAINT ON (t:Transaction)"
+                                + " ASSERT t.trId IS UNIQUE");
                         tx1.run("CREATE INDEX ON :Assortment(name)");
                         tx1.run("CREATE INDEX ON :Mpg(name)");
                         tx1.run("CREATE INDEX ON :RefMaterial(refMtrlName)");
+                        tx1.run("CREATE INDEX ON :Transaction(dayOfMonth)");
+                        tx1.run("CREATE INDEX ON :Transaction(month)");
+                        tx1.run("CREATE INDEX ON :Transaction(year)");
 
                         tx1.success();
                         setIndex = false;
