@@ -157,17 +157,13 @@ public class TransactionReader {
                             qty = 1e3 * qty;
                         }
                     }
-
-//                Filter out not assigned mtrl and customer numbers
-                    if (!tr.getMaterialKey().equals("#") && !tr.
-                            getFinalCustomerKey().equals("#")) {
-                        TRANSACTION_MAP.put(key.hashCode(), new TransactionBean(
-                                myDate, tr.getCategory(), tr.getMarketKey(), tr.
-                                getFinalCustomerKey(), tr.getFinalCustomerName(),
-                                myCustomerGroup, tr.getCustomerType(),
-                                tr.getMaterialKey(), myNetSales, myDirectCost,
-                                qty, myType, true));
-                    }
+//                  Put transactions to transaction map
+                    TRANSACTION_MAP.put(key.hashCode(), new TransactionBean(
+                            myDate, tr.getCategory(), tr.getMarketKey(), tr.
+                            getFinalCustomerKey(), tr.getFinalCustomerName(),
+                            myCustomerGroup, tr.getCustomerType(),
+                            tr.getMaterialKey(), myNetSales, myDirectCost,
+                            qty, myType, true));
                 }
             }
         } catch (IOException e) {

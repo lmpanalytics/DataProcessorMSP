@@ -64,13 +64,10 @@ public class InvoiceReader {
 
             while ((invoice = beanReader.read(InvoiceBean.class, header,
                     processors)) != null) {
-//                Filter out not assigned mtrl numbers
-                if (!invoice.getMaterialKey().equals("#")) {
 //                Create composite key
-                    Integer compositeKey = (invoice.getMarketKey() + invoice.
-                            getMaterialKey()).hashCode();
-                    INVOICE_MAP.put(compositeKey, invoice);
-                }
+                Integer compositeKey = (invoice.getMarketKey()
+                        + invoice.getMaterialKey()).hashCode();
+                INVOICE_MAP.put(compositeKey, invoice);
             }
         } catch (IOException e) {
             throw e;
