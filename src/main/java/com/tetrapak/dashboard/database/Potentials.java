@@ -49,6 +49,10 @@ public class Potentials {
 
             int eqCounter = 0;
 
+//            Remove old potentials before loading new data 
+            String tx1 = "MATCH (:Assortment)-[r:POTENTIAL_AT]->(:Customer) DETACH DELETE r";
+            session.run(tx1);
+
             for (Map.Entry<Integer, InstalledBaseBean> entry : potMap.entrySet()) {
                 InstalledBaseBean value = entry.getValue();
 

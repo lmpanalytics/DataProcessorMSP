@@ -73,8 +73,11 @@ public class Transactions {
 //              Run multiple statements
                         tx1.run("CREATE CONSTRAINT ON (cy:CountryDB)"
                                 + " ASSERT cy.countryId IS UNIQUE");
-                        tx1.run("CREATE INDEX ON :ClusterDB(name)");
-                        tx1.run("CREATE INDEX ON :MarketGroup(mktGrpId)");
+                        tx1.run("CREATE CONSTRAINT ON (c:ClusterDB)"
+                                + " ASSERT c.name IS UNIQUE");
+                        tx1.run("CREATE CONSTRAINT ON (mg:MarketGroup)"
+                                + " ASSERT mg.mktGrpId IS UNIQUE");
+
                         tx1.run("CREATE INDEX ON :MarketGroup(name)");
                         tx1.run("CREATE INDEX ON :MarketDB(mktId)");
                         tx1.run("CREATE INDEX ON :MarketDB(mktName)");
@@ -415,9 +418,13 @@ public class Transactions {
 //              Run multiple statements
                         tx1.run("CREATE CONSTRAINT ON (t:Transaction)"
                                 + " ASSERT t.trId IS UNIQUE");
-                        tx1.run("CREATE INDEX ON :Assortment(name)");
-                        tx1.run("CREATE INDEX ON :Mpg(name)");
-                        tx1.run("CREATE INDEX ON :RefMaterial(refMtrlName)");
+                        tx1.run("CREATE CONSTRAINT ON (a:Assortment)"
+                                + " ASSERT a.name IS UNIQUE");
+                        tx1.run("CREATE CONSTRAINT ON (mpg:Mpg)"
+                                + " ASSERT mpg.name IS UNIQUE");
+                        tx1.run("CREATE CONSTRAINT ON (ref:RefMaterial)"
+                                + " ASSERT ref.refMtrlName IS UNIQUE");
+
                         tx1.run("CREATE INDEX ON :Transaction(dayOfMonth)");
                         tx1.run("CREATE INDEX ON :Transaction(month)");
                         tx1.run("CREATE INDEX ON :Transaction(year)");
