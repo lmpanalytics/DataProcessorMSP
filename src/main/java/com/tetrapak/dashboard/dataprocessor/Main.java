@@ -15,42 +15,19 @@ import com.tetrapak.dashboard.models.MaterialBean;
 import com.tetrapak.dashboard.models.ReferencePartBean;
 import com.tetrapak.dashboard.models.TransactionBean;
 import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * This application reads raw data from csv files, Transforms the raw data and
- * Loads processed and clean data into a Neo4j database. New data is added to
- * the database, never deleted.
+ * Loads processed and cleansed data into a Neo4j graph database. New data is
+ * added to the database, never deleted.
+ *
+ * The application's execution steps in the below Main Method are: 1) Create
+ * Service Categories, 2) Load Market Data, 3) Load Customer Data, 4) Load
+ * Transaction Data, and 5) Load Potentials Data.
  *
  * @author SEPALMM
  */
 public class Main {
-
-    /**
-     * Makes a list of end-of-month dates, starting starting January two years
-     * ago plus 36 months. It's rolling year-by-year adding a new set of 12
-     * months as needed. It's not overwriting any data. The tree's root is named
-     * `dashboard'.
-     *
-     * @return List of dates
-     */
-    private static List<LocalDate> makeThreeYearDateList() {
-
-        LocalDate currentDate = LocalDate.now();
-//        Find the year two years ago from current date
-        int yearH2 = currentDate.getYear() - 2;
-        LocalDate startingDate = LocalDate.of(yearH2, Month.JANUARY, 31);
-
-        List<LocalDate> dateList = new LinkedList<>();
-
-        for (int i = 0; i < (3 * 12); i++) {
-            dateList.add(startingDate.plusMonths(i));
-        }
-        return dateList;
-    }
 
     /**
      * @param args the command line arguments
@@ -77,29 +54,23 @@ public class Main {
 //            Create service categories (approximately 1 sec)
             trx.createServiceCategories();
 
-//            DO NOT USE THIS >>> Make timeline tree (approximately 1 sec)
-//            trx.makeTimeLineTree(makeThreeYearDateList());
-
 //            Load global market structure (approximately 3 sec)
             trx.loadMarketData(mkt);
-
-            /* DO NOT USE THIS >>> Load global material master and assign Reference part mapping (approximately 2.5 minutes) */
-//            trx.loadMaterialData(mtrl, refMtrl);
 
 //            Load customer data (approximately 1 sec)
             trx.loadCustomerData(tr, ib);
 
 //            Load transactions (approximately 15 sec)
             trx.loadTransactionData(tr, inv, mtrl, refMtrl);
-            
+
 //            Load potentials (approximately xxx sec)
             pot.loadPotentialsData(ib);
-            
+
             Timestamp timestampEnd = new Timestamp(System.currentTimeMillis());
-            System.out.println(timestampEnd + " :: Finished data load process.");            
-            
+            System.out.println(timestampEnd + " :: Finished data load process.");
+
         } catch (Exception e) {
-            throw e; 
+            throw e;
         } finally {
             trx.closeNeo4jDriver();
             pot.closeNeo4jDriver();

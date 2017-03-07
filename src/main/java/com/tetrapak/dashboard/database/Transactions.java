@@ -14,7 +14,6 @@ import com.tetrapak.dashboard.models.ReferencePartBean;
 import com.tetrapak.dashboard.models.TransactionBean;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,61 +41,6 @@ public class Transactions {
 
     Driver driver = GraphDatabase.driver(Utilities.URI(),
             AuthTokens.basic(Utilities.myUserName(), Utilities.myPassword()));
-
-    /**
-     * Makes a Timeline Tree. Each year has its own set of month nodes; each
-     * month has its own set of day nodes. The Cypher statement ensures that all
-     * necessary nodes and relationships for a particular event—year, month,
-     * day, plus the node representing the event itself—are either already
-     * present in the graph, or, if not present, are added to the graph (MERGE
-     * will add any missing elements):
-     *
-     * @param dateList the list of dates to use
-     */
-    public void makeTimeLineTree(List<LocalDate> dateList) {
-        try (Session session = driver.session()) {
-            String timelineID = "dashboard";
-
-            for (LocalDate localDate : dateList) {
-                int year = localDate.getYear();
-                Month month = localDate.getMonth();
-                int monthNumber = localDate.getMonth().getValue();
-                String monthName = month.toString();
-                int dayOfMonth = localDate.getDayOfMonth();
-                String day = localDate.getDayOfWeek().toString();
-
-                try (Transaction tx1 = session.beginTransaction()) {
-//              Run multiple statements
-                    tx1.run("CREATE CONSTRAINT ON (t:Timeline)"
-                            + " ASSERT t.id IS UNIQUE");
-                    tx1.run("CREATE INDEX ON :Year(year)");
-                    tx1.run("CREATE INDEX ON :Month(month)");
-                    tx1.run("CREATE INDEX ON :Day(dayOfMonth)");
-
-                    tx1.success();
-                }
-
-                String tx2 = "MERGE (t:Timeline {id: {timelineID}})"
-                        + " MERGE ((t)-[:YEAR]->(y:Year { year: {year}}))"
-                        + " MERGE ((y)-[:MONTH]->(m:Month {month: {monthNumber}, name: {monthName}}))"
-                        + " MERGE ((m)-[:DAY]->(d:Day { year: {year}, month: {monthNumber}, dayOfMonth: {dayOfMonth}, name: {day}}))";
-
-                session.run(tx2, Values.parameters(
-                        "timelineID", timelineID,
-                        "year", year,
-                        "monthNumber", monthNumber,
-                        "monthName", monthName,
-                        "dayOfMonth", dayOfMonth,
-                        "day", day
-                ));
-
-            }
-
-        } catch (ClientException e) {
-            System.err.
-                    println("Exception in makeTimeLineTree:" + e.getMessage());
-        }
-    }
 
     /**
      * Creates Nodes for Clusters, Market Groups, Markets and Countries. The
@@ -162,78 +106,6 @@ public class Transactions {
         } catch (ClientException e) {
             System.err.println("Exception in loadMarketData:" + e.getMessage());
             System.exit(1);
-        }
-
-    }
-
-    /**
-     * Loads and creates Nodes for Reference parts, MPGs and Assortments.
-     *
-     * @param materialMap containing the Material-Key, and Values of
-     * Material-Number, -Name, MPG, and Assortment Group
-     * @param refMtrlMap containing the Reference Material-Key, and Values of
-     * Reference Material-Number, and -Name.
-     */
-    public void loadMaterialData(Map<String, MaterialBean> materialMap,
-            Map<String, ReferencePartBean> refMtrlMap) {
-        try (Session session = driver.session()) {
-
-            int transactionCounter = 0;
-            boolean setIndex = true;
-
-            String globalMtrlID = "dashboard";
-            globalMtrlID = Utilities.toCypherVariableFormat(globalMtrlID);
-
-            for (Map.Entry<String, MaterialBean> entry : materialMap.entrySet()) {
-                String key = entry.getKey();
-                MaterialBean value = entry.getValue();
-
-                String mtrlNumber = key;
-//                Fix read error by removing "'" from material names
-                String mtrlName = value.getMaterialName().replaceAll("'",
-                        "");
-                String mpg = value.getMpg();
-                String assortment = value.getAssortmentGroup();
-
-//                Lookup and assign the refence material name
-                String refName = "Other";
-                if (refMtrlMap.containsKey(mtrlNumber)) {
-                    refName = refMtrlMap.get(mtrlNumber).getRefMaterialName();
-                }
-
-                while (setIndex) {
-                    try (Transaction tx1 = session.beginTransaction()) {
-//              Run multiple statements
-//                        tx1.run("CREATE CONSTRAINT ON (mtrl:Material) ASSERT mtrl.id IS UNIQUE");
-                        tx1.run("CREATE INDEX ON :Assortment(name)");
-                        tx1.run("CREATE INDEX ON :Mpg(name)");
-                        tx1.run("CREATE INDEX ON :RefMaterial(refMtrlName)");
-
-                        tx1.success();
-                        setIndex = false;
-                    }
-                }
-
-                String tx2 = "MERGE (:Assortment { name: {assortment}})"
-                        + " MERGE (:Mpg { name: {mpg}})"
-                        + " MERGE (:RefMaterial { refMtrlName: {refName}})";
-
-                session.run(tx2, Values.parameters(
-                        //                        "globalMtrlID", globalMtrlID,
-                        "assortment", assortment,
-                        "mpg", mpg,
-                        //                        "mtrlNumber", mtrlNumber,
-                        //                        "mtrlName", mtrlName,
-                        "refName", refName
-                ));
-
-                transactionCounter++;
-            }
-            System.out.format("Processed %d materials.\n", transactionCounter);
-        } catch (ClientException e) {
-            System.err.
-                    println("Exception in loadMaterialData:" + e.getMessage());
-            System.exit(2);
         }
 
     }
