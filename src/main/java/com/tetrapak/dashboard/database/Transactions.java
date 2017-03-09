@@ -91,7 +91,8 @@ public class Transactions {
                 String tx2 = "MERGE (c:ClusterDB { name:{cluster}})"
                         + " MERGE (mgrp:MarketGroup {mktGrpId: {mktGroupCode}, name: {mktGroupName}})"
                         + " MERGE (mkt:MarketDB:CountryDB {mktId: {mktCode}, mktName: {mktName}, countryId: {isoCountryCode}, countryName: {countryName}})"
-                        + " MERGE (c)<-[:MEMBER_OF]-(mgrp)<-[:MEMBER_OF]-(mkt)";
+                        + " MERGE (c)<-[:MEMBER_OF]-(mgrp)"
+                        + " MERGE (mgrp)<-[:MEMBER_OF]-(mkt)";
 
                 session.run(tx2, Values.parameters(
                         "cluster", cluster,
