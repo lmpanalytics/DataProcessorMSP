@@ -188,9 +188,9 @@ marketMap.put("CI",  new MarketBean("CI", "CÔTE D'IVOIRE", "257", "NIGERIA", "G
 marketMap.put("ET",  new MarketBean("ET", "ETHIOPIA", "297", "ETHIOPIA", "G289", "EAST AFRICA", "GME&A"));
 marketMap.put("GA",  new MarketBean("GA", "GABON", "263", "GABON", "G257", "WEST AFRICA", "GME&A"));
 marketMap.put("GD",  new MarketBean("GD", "GRENADA", "132", "PANAMA", "G132", "CENTRAL A. & CARIBBEAN", "NC&SA"));
-marketMap.put("LC",  new MarketBean("LC", "SAINT LUCIA", "132", "PANAMA", "G132", "CENTRAL A. & CARIBBEAN", "NC&SA"));
+marketMap.put("LC",  new MarketBean("LC", "SAINT LUCIA", "142", "SAINT LUCIA", "G132", "CENTRAL A. & CARIBBEAN", "NC&SA"));
 marketMap.put("LS",  new MarketBean("LS", "LESOTHO", "272", "SOUTH AFRICA", "G272", "SOUTH AFRICA", "GME&A"));
-marketMap.put("SO",  new MarketBean("SO", "SOMALIA", "289", "KENYA", "G289", "EAST AFRICA", "GME&A"));
+marketMap.put("SO",  new MarketBean("SO", "SOMALIA", "295", "SOMALIA", "G289", "EAST AFRICA", "GME&A"));
 marketMap.put("SZ",  new MarketBean("SZ", "SWAZILAND", "272", "SOUTH AFRICA", "G272", "SOUTH AFRICA", "GME&A"));
 marketMap.put("TG",  new MarketBean("TG", "TOGO", "257", "NIGERIA", "G257", "WEST AFRICA", "GME&A"));
 marketMap.put("VC",  new MarketBean("VC", "SAINT VINCENT AND THE GRENADINES", "132", "PANAMA", "G132", "CENTRAL A. & CARIBBEAN", "NC&SA"));
