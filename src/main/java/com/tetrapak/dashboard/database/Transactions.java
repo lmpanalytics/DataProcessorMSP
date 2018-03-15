@@ -203,9 +203,13 @@ public class Transactions {
 
 //        Delete Customers in DB originating from TecBase
         try (Session session = driver.session()) {
+            System.out.println("Preparing to delete customers");
             Transaction tx1 = session.beginTransaction();
             tx1.run("MATCH (c:Customer {isSourceBO: 'false'}) DETACH DELETE c");
             tx1.success();
+        } catch (Exception e) {
+            System.err.println("Exception in deleting Customers in DB originating from TecBase. Program exits. " + e.getMessage());
+            System.exit(2);
         }
 
         //        Add Customer data from TecBase to customerMap if absent
