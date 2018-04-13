@@ -196,6 +196,7 @@ marketMap.put("TG",  new MarketBean("TG", "TOGO", "257", "NIGERIA", "G257", "WES
 marketMap.put("VC",  new MarketBean("VC", "SAINT VINCENT AND THE GRENADINES", "132", "PANAMA", "G132", "CENTRAL A. & CARIBBEAN", "NC&SA"));
 marketMap.put("GB2",  new MarketBean("GB2", "NORTHERN IRELAND", "018", "NORTHERN IRELAND", "E017", "NORTH WEST EUROPE", "E&CA"));
 marketMap.put("XK",  new MarketBean("XK", "KOSOVO", "037", "KOSOVO", "E033", "SOUTH EASTERN EUROPE", "E&CA"));
+marketMap.put("MV", new MarketBean("MV", "MALDIVES", "074", "MALDIVES", "G095", "SOUTH ASIAN MARKETS", "SAEA&O"));
     }
 
     public static Map<String, MarketBean> getMarketMap() {
